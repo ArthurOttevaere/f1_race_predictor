@@ -1,14 +1,19 @@
 import Link from "next/link";
 import { createClient, getUser } from "@/lib/supabase/server";
 import { CURRENT_SEASON } from "@/lib/constants";
-import { formatMargin, formatPoints } from "@/lib/format";
+import { formatPoints } from "@/lib/format";
 import type { LeaderboardRow, League, Race } from "@/lib/types";
 import LeagueSwitcher from "@/components/LeagueSwitcher";
 import LeagueCardActions from "@/components/LeagueCardActions";
 import SeasonRaces from "@/components/SeasonRaces";
+import StandingsBoard, {
+  type BoardLine,
+  type FormMark,
+} from "@/components/StandingsBoard";
 import StandingsPager from "@/components/StandingsPager";
 import { modelEntries, modelSeason } from "@/lib/model";
 import { fieldSummary } from "@/lib/duels";
+import { seasonPickColor } from "@/lib/teams";
 
 export const metadata = { title: "Standings" };
 export const revalidate = 120;
@@ -95,7 +100,67 @@ export default async function StandingsPage({
     p_offset: offset,
   });
   const board = (rows as LeaderboardRow[]) ?? [];
-  const lines = board.map((row, i) => ({ row, rank: offset + i + 1 }));
+
+  // Second wave, on the page we are actually going to draw: the colour each
+  // player rides in (their championship call) and the shape of their last
+  // five duels. Both are scoped to the hundred rows on screen — the roster is
+  // two dozen rows, the picks at most a hundred, the form five a player
+  // (migration 0012) — so the board costs the same at any league size.
+  const listedIds = board.map((row) => row.user_id);
+  const [{ data: pickRows }, { data: rosterRows }, { data: formRows }] =
+    listedIds.length > 0
+      ? await Promise.all([
+          supabase
+            .from("season_picks")
+            .select("user_id, champion_driver, champion_team")
+            .eq("season", CURRENT_SEASON)
+            .in("user_id", listedIds),
+          supabase
+            .from("drivers")
+            .select("driver_id, team, team_color")
+            .eq("season", CURRENT_SEASON),
+          supabase.rpc("player_form", {
+            p_season: CURRENT_SEASON,
+            p_user_ids: listedIds,
+          }),
+        ])
+      : [{ data: [] }, { data: [] }, { data: [] }];
+
+  const roster =
+    (rosterRows as { driver_id: string; team: string; team_color: string | null }[]) ??
+    [];
+  const pickOf = new Map(
+    (
+      (pickRows as {
+        user_id: string;
+        champion_driver: string;
+        champion_team: string;
+      }[]) ?? []
+    ).map((p) => [p.user_id, p]),
+  );
+  // A missing `player_form` (the migration hasn't landed yet) costs the board
+  // its newest column, not its ability to render.
+  const formOf = new Map<string, FormMark[]>();
+  for (const row of (formRows as (FormMark & { user_id: string })[]) ?? []) {
+    const marks = formOf.get(row.user_id) ?? [];
+    marks.push({ round: row.round, name: row.name, outcome: row.outcome });
+    formOf.set(row.user_id, marks);
+  }
+
+  const lines: BoardLine[] = board.map((row, i) => ({
+    userId: row.user_id,
+    rank: offset + i + 1,
+    username: row.username,
+    isViewer: row.user_id === user?.id,
+    color: seasonPickColor(pickOf.get(row.user_id) ?? null, roster),
+    races: row.races_played,
+    wins: row.duel_wins,
+    draws: row.duel_draws,
+    losses: row.duel_losses,
+    margin: Number(row.margin),
+    points: Number(row.points),
+    form: formOf.get(row.user_id) ?? [],
+  }));
 
   const scoredRaces = ((races as Race[]) ?? [])
     .filter((r) => r.status === "scored")
@@ -152,12 +217,7 @@ export default async function StandingsPage({
             </section>
           )}
 
-          <Board
-            lines={lines}
-            empty={board.length === 0}
-            viewerId={user.id}
-            model={model}
-          />
+          <Board lines={lines} model={model} />
 
           {totalPages > 1 && (
             <StandingsPager
@@ -171,12 +231,7 @@ export default async function StandingsPage({
         </LeagueSwitcher>
       ) : (
         <>
-          <Board
-            lines={lines}
-            empty={board.length === 0}
-            viewerId={null}
-            model={model}
-          />
+          <Board lines={lines} model={model} />
           {totalPages > 1 && (
             <StandingsPager
               page={page}
@@ -297,137 +352,23 @@ function ModelBar({ points, races }: { points: number; races: number }) {
   );
 }
 
+/**
+ * The board, or the reason there isn't one.
+ *
+ * `StandingsBoard` draws the tower; this only decides whether there is a
+ * tower to draw, because "nobody has scored yet" is not an empty list, it is
+ * the one moment the game's proposition is legible (§7.8, EmptyBoard).
+ */
 function Board({
   lines,
-  empty,
-  viewerId,
   model,
 }: {
-  lines: { row: LeaderboardRow; rank: number }[];
-  empty: boolean;
-  viewerId: string | null;
+  lines: BoardLine[];
   /** Only used when there is nobody on the board — see EmptyBoard. */
   model: { points: number; races: number };
 }) {
-  // One empty state, not an empty list on a phone and an empty table beside
-  // it: with no rows there is nothing for the two cuts to disagree about.
-  if (empty) return <EmptyBoard points={model.points} races={model.races} />;
-
-  const rows = lines.map(({ row, rank }) => ({
-    key: row.user_id,
-    rank,
-    username: row.username,
-    isViewer: row.user_id === viewerId,
-    races: row.races_played,
-    wins: row.duel_wins,
-    record: `${row.duel_wins}-${row.duel_draws}-${row.duel_losses}`,
-    margin: Number(row.margin),
-    points: Number(row.points),
-  }));
-
-  const name = (r: (typeof rows)[number]) => (
-    <>
-      <Link
-        href={`/profile/${r.username}`}
-        className="font-medium hover:underline"
-      >
-        {r.username}
-      </Link>
-      {r.isViewer && (
-        <span className="ml-2 rounded-full bg-race/15 px-2 py-0.5 font-mono text-[0.65rem] text-race">
-          YOU
-        </span>
-      )}
-    </>
-  );
-
-  // Positive margins are the point of the column, so they get the colour.
-  const marginTone = (m: number) =>
-    m > 0 ? "text-emerald-400" : m < 0 ? "text-ink-mute" : "text-ink-dim";
-
-  return (
-    <>
-      {/* ── Phone: one card per player ──────────────────────────────────
-          The table below needs 32rem to lay its six columns out and a phone
-          hands it 21. Everything past that would sit behind a sideways scroll
-          with no visible bar on iOS. Same data, stacked. */}
-      <ul className="flex flex-col gap-1.5 sm:hidden">
-        {rows.map((r) => (
-          <li
-            key={r.key}
-            className={`flex items-center gap-3 rounded-control border px-3 py-2.5 ${
-              r.isViewer
-                ? "border-line-hi bg-glass-strong"
-                : "border-line bg-glass"
-            }`}
-          >
-            <span className="w-5 shrink-0 font-mono text-sm text-ink-mute">
-              {r.rank}
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm">{name(r)}</span>
-              <span className="mt-0.5 block font-mono text-[0.7rem] text-ink-mute">
-                {r.races} {r.races === 1 ? "race" : "races"} · {r.record} ·{" "}
-                <span className={marginTone(r.margin)}>
-                  {formatMargin(r.margin)}
-                </span>
-              </span>
-            </span>
-            <span className="shrink-0 text-right">
-              <span className="block font-mono text-base">{r.wins}</span>
-              <span className="block font-mono text-[0.6rem] tracking-wider text-ink-mute uppercase">
-                {r.wins === 1 ? "win" : "wins"}
-              </span>
-            </span>
-          </li>
-        ))}
-      </ul>
-
-      {/* ── Tablet and up: the full table ── */}
-      <section className="glass-card hidden overflow-x-auto p-2 sm:block">
-        <table className="w-full min-w-[32rem] border-separate border-spacing-0 text-sm">
-          <thead>
-            <tr className="text-left font-mono text-xs tracking-wider text-ink-mute uppercase">
-              <th className="px-3 py-2 font-medium">#</th>
-              <th className="px-3 py-2 font-medium">Player</th>
-              <th className="px-3 py-2 text-right font-medium">Wins</th>
-              <th className="px-3 py-2 text-right font-medium">W-D-L</th>
-              <th className="px-3 py-2 text-right font-medium">Margin</th>
-              <th className="px-3 py-2 text-right font-medium">Points</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr
-                key={r.key}
-                className={`border-t border-line ${r.isViewer ? "bg-glass" : ""}`}
-              >
-                <td className="px-3 py-2.5 font-mono text-ink-mute">{r.rank}</td>
-                <td className="px-3 py-2.5">
-                  {name(r)}
-                  <span className="ml-2 font-mono text-xs text-ink-mute">
-                    {r.races} {r.races === 1 ? "race" : "races"}
-                  </span>
-                </td>
-                <td className="px-3 py-2.5 text-right font-mono font-semibold">
-                  {r.wins}
-                </td>
-                <td className="px-3 py-2.5 text-right font-mono text-xs text-ink-dim">
-                  {r.record}
-                </td>
-                <td
-                  className={`px-3 py-2.5 text-right font-mono ${marginTone(r.margin)}`}
-                >
-                  {formatMargin(r.margin)}
-                </td>
-                <td className="px-3 py-2.5 text-right font-mono text-ink-dim">
-                  {formatPoints(r.points)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-    </>
-  );
+  if (lines.length === 0) {
+    return <EmptyBoard points={model.points} races={model.races} />;
+  }
+  return <StandingsBoard lines={lines} />;
 }

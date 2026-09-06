@@ -219,7 +219,10 @@ export default function ProfileView({
                 Round {weekend.round} · not entered
               </p>
               <p className="display mt-1 text-lg font-extrabold tracking-tight">
-                Your top 10 for the {weekend.name} isn&apos;t in.
+                {/* `{" "}` on purpose: the compiler drops the space between
+                    an expression and text that starts with an entity, and
+                    "Grand Prixisn't" shipped once. */}
+                Your top 10 for the {weekend.name}{" "}isn&apos;t in.
               </p>
               <Countdown
                 to={weekend.raceAt}

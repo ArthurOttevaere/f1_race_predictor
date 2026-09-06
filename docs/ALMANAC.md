@@ -5,7 +5,7 @@
 > breaks. If you can only read one document, read this one.
 
 **Status:** live in production.
-**Last reviewed:** 2026-09-06 (`feat/profile-duels-review`, after PR #83 — the duel sheet on profiles, the championship call as a welcome step, the model's season on the home page, migration 0011; live on https://f1-duel.com).
+**Last reviewed:** 2026-09-06 (`feat/standings-timing-tower`, after PR #84 — the standings board redrawn as a timing tower with form and the championship colour, migration 0012; live on https://f1-duel.com).
 **Maintenance rule:** this file must be updated in the same change that alters
 behaviour it describes — schema, scoring, jobs, routes, env vars, deployment,
 workflows. See [§14 Keeping this document true](#14-keeping-this-document-true).
@@ -862,6 +862,7 @@ editor.
 | `0009_model_picks_secret_until_lock.sql` | replaces `public read` on `model_entries` with `read post-lock`; adds the `model_entry_status` view | ⚠️ **apply before the next race weekend** — until it runs, the model's picks are readable while the race is open |
 | `0010_profile_theme.sql` | `profiles.theme` (`driver` \| `team`, default `driver`) — which half of the championship call paints the profile | ✅ confirmed 2026-08-27 |
 | `0011_race_field_summary.sql` | `race_field_summary(season)` — per race: players, beat, drew; one aggregate over the public `scores` (security invoker) so the race lists never read every score of the season | ✅ applied 2026-09-06 (through the Supabase MCP, in the same session as the PR) |
+| `0012_player_form.sql` | `player_form(season, user_ids[], races=5)` — the last five duels of each listed player, `W`/`D`/`L` with the round and the Grand Prix, oldest first. A window function, because a hundred players by two dozen races is past the 1000-row cap | ✅ applied 2026-09-06 |
 
 The app is written to survive a missing migration rather than crash: profile
 reads use `select("*")` instead of naming new columns, and `lib/auth.ts`
@@ -1757,6 +1758,16 @@ page's four blocks and one site-wide habit:
 - **Pagination became a band of positions** (S-4,
   `components/StandingsPager.tsx`): `21–40 of 96 players` and two square
   chevron controls, above one page only.
+
+*The board is a timing tower* (2026-09-06, `components/StandingsBoard.tsx`,
+DESIGN §7.5.1). The `<table>`-in-a-card and its separate phone stack are gone:
+one `<ol>` at every width, no card, three columns folding into a sub-line
+below `sm`. New in it — a segmented **Record** bar (with the counts above it,
+never colour alone), a **Form** strip of the last five duels, and the rule of
+each player's championship-call colour left of their name. The page reads
+those in a second wave scoped to the hundred rows on screen: `season_picks`
+and `drivers` for the colour, `player_form` (migration 0012) for the strip. A
+missing `player_form` costs the column, not the page.
 
 *Race by race, for everyone* (2026-09-06). Signed out, the race list was a
 bare list of names — a table promising nothing. `SeasonRaces` now carries two
