@@ -1041,7 +1041,7 @@ Three things it says that a row of figures could not:
 Restraint holds where it matters: P1 is brighter ink, P2–P3 a step down, the
 rest `ink-mute`. No medals, no podium blocks, no row that glows.
 
-**A season is a table, and it took three tries to admit it.**
+**A season is a table, and it took three tries to admit it — then a fourth to sit it next to another one.**
 `components/SeasonRaces.tsx` was a wrap of identical pills (twenty-four of
 them, one undifferentiated heap), then one card per Grand Prix in a
 three-column grid — a real improvement, and still the site's fourth grid of
@@ -1054,6 +1054,24 @@ It is an `<ol>` of `<Link>` rows rather than a `<table>`, because every line
 goes somewhere; the header is a mono `aria-hidden` grid on the same column
 template. **Signed out, the two right-hand columns are not rendered at all** —
 a table with two empty columns promises data it does not have.
+
+**Then it took a fourth: two lists of the same material, stacked, are one
+list.** The day the board above it became a tower (§7.5.1), the standings page
+was a hairline-ruled list of players followed by a hairline-ruled list of
+races at the same weight, the same rhythm and the same column logic — and a
+reader could not tell the ranking from the archive without reading it. Neither
+list was wrong; the pair was.
+
+**The rule this leaves.** When two lists share a page, one of them has to give
+up a weight class, and it is always the one you go *into* rather than the one
+you read. So the archive is a single line a row at two-thirds the height, mono
+one step down, the circuit tucked inline after the Grand Prix instead of
+taking a line, rules at `border-line/60`, and a chevron — the thing the
+board's rows never carry, because they are a standing and this one goes
+somewhere. Above it, a rule, a heading and a sentence of prose that the board
+does not have. Naming both sections was the other half: the page is called
+*Standings*, the board had no name of its own, so the first heading anyone met
+was *Race by race* and it looked like the caption for everything under it.
 
 ### 7.6 Driver row
 
