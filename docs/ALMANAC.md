@@ -1233,6 +1233,48 @@ is the only way to see what you are about to ship.
 
 ---
 
+### 8.9 GitHub Actions cannot reach the F1 timing API
+
+**The single most consequential constraint in this system, and it is silent.**
+
+Every FastF1 data source falls into one of two families:
+
+| Family | Host | From a laptop | From an Actions runner |
+| --- | --- | --- | --- |
+| **Ergast / Jolpica** | `api.jolpi.ca` | works | **works** |
+| **F1 live timing** | `livetiming.formula1.com` | works | **fails, always** |
+
+A verbose run (§8.4, `FASTF1_VERBOSE=1`) shows it plainly: `Failed to load
+session info data!`, `Failed to load driver list`, `Failed to load session
+status data!`, `Failed to load timing data!`, `Failed to load race control
+messages!` — every timing endpoint, while Ergast answers in the same pass.
+
+FastF1 reports a source it could not fetch as a **WARNING and then carries on**
+returning empty structures. It does not raise. Combined with `src/predict.py`
+pinning FastF1's loggers to `CRITICAL`, this failed invisibly for an entire
+season. Three consequences, all verified against the live database:
+
+| Symptom | Extent | Why |
+| --- | --- | --- |
+| `model_entries.pre_quali` = `true` | **every race of 2026** | the grid comes from timing, so the model has never once had qualifying when it locked its entry |
+| `results.safety_car` = `null` | **every scored race of 2026** | race-control messages come from timing, so the safety-car side bet has never been settled for anybody |
+| Same-evening scoring never fires | always, in CI | `actual_classification` falls through to `{}` and waits for Ergast |
+
+The third is benign — Ergast is usually quick (§8.4.1). The first two are not:
+`pre_quali` degrades the opponent every player is scored against, and a side
+bet that silently never pays is a scoring bug.
+
+**What this means for anything you add.** Before a job depends on a FastF1
+field, ask which family it comes from. Anything about a *session in progress or
+just finished* — timing, positions, race control, the grid, tyre stints — is
+timing-only and will not work on Actions. Anything about a *published result*
+is Ergast and will.
+
+**Status: open.** The agreed direction is to split `lock_race.py` — the flip to
+`locked` is clock-and-database only and must stay on Actions, because closing
+predictions at lights out cannot depend on a machine being awake, while the
+model-entry refresh moves to a host that can reach timing. Not implemented.
+
 ## 9. Part VI — The web frontend
 
 `web/` — Next.js **16.2.12**, React 19.2, App Router, TypeScript, Tailwind v4,
@@ -2610,6 +2652,8 @@ page renders empty locally; the harness is not optional.
 | --- | --- | --- | --- |
 | 1 | A race locked with **no** model entry can never be scored (§8.3) | `score_race` refuses it forever; `lock-race` only scans `scheduled` races, so it never retries | Let `lock_race` backfill entries for `locked`-but-unscored races. Until then, recovery is manual (§8.3) |
 | 2 | README says Optuna runs 50 trials; `train.py` uses 60 | Documentation only | Align the README |
+| 3 | **The model has never had the grid.** Actions cannot reach the F1 timing API (§8.9), so `model_entries.pre_quali` is `true` for every race of 2026 | The opponent every player is scored against locks its entry without qualifying — the calibrated matrix falls back on an uninformed grid prior | Split `lock_race.py`: keep the flip to `locked` on Actions, move the model-entry refresh to a host that can reach timing (§8.9) |
+| 4 | **The safety-car side bet has never been settled.** Same cause: race-control messages are timing-only, so `results.safety_car` is `null` on all twelve scored races of 2026 | Every player's SC bet scores zero, silently, whatever happened in the race | Same fix as #3; `set_dotd`-style manual entry would also work as a stopgap |
 
 ### 13.1.1 Fixed
 
