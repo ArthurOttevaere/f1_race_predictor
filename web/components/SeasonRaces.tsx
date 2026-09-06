@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatPoints } from "@/lib/format";
+import type { FieldSummary } from "@/lib/duels";
 
 export interface SeasonRace {
   id: number;
@@ -25,43 +26,49 @@ export interface MyRace {
  * season takes everywhere else in this sport: the round hanging in the margin,
  * the Grand Prix, and the numbers in tabular columns you can run an eye down.
  *
- * Signed out, the two right-hand columns do not exist at all — a table with
- * two empty columns promises data it does not have. The result letter carries
- * the site's own W/D/L tones (§3.2), which is also a small correction: the old
- * card drew a win in race red, the colour that means the model won everywhere
- * else.
+ * Two of those columns are everybody's — what the model scored, and how many
+ * of the players who entered beat it — because a signed-out reader used to get
+ * a bare list of names, a table promising nothing at all. The last two are the
+ * viewer's own and do not exist signed out. The result letter carries the
+ * site's own W/D/L tones (§3.2).
  */
 export default function SeasonRaces({
   races,
+  model,
+  field,
   mine,
 }: {
   races: SeasonRace[];
+  /** The model's total by race id. */
+  model: Map<number, number>;
+  /** How the field did against it, by race id (migration 0011). */
+  field: Map<number, FieldSummary>;
   /** The viewer's scores by race id, or null when signed out. */
   mine: Map<number, MyRace> | null;
 }) {
+  const cols = mine
+    ? "grid-cols-[2rem_minmax(0,1fr)_3.5rem_3.5rem_3.5rem] sm:grid-cols-[2.75rem_minmax(0,1fr)_4rem_5.5rem_5rem_3.5rem]"
+    : "grid-cols-[2rem_minmax(0,1fr)_3.5rem_5rem] sm:grid-cols-[2.75rem_minmax(0,1fr)_4rem_5.5rem]";
   return (
       <section>
         <h2 className="font-mono text-xs tracking-[0.2em] text-ink-dim uppercase">
           Race by race
         </h2>
 
-        {/* S-2: this was a wrap of identical pills, then one card per race
-            in a three-column grid — an improvement, and still the site's
-            fourth grid of equal cards. A season is a *table* everywhere
-            else in this sport: one line per round, the number hanging in
-            the margin, the numbers in tabular columns. Twenty-four lines
-            read faster than twenty-four tiles, and the eye can run down a
-            column of results, which is the whole reason to look. */}
         <div
           aria-hidden
-          className="mt-5 grid grid-cols-[2rem_minmax(0,1fr)_3.5rem] gap-x-4 px-2 pb-2 font-mono text-[0.6rem] tracking-wider text-ink-mute uppercase sm:grid-cols-[2.75rem_minmax(0,1fr)_5rem_3.5rem] sm:gap-x-6"
+          className={`mt-5 grid ${cols} gap-x-3 px-2 pb-2 font-mono text-[0.6rem] tracking-wider text-ink-mute uppercase sm:gap-x-6`}
         >
           <span>Rd</span>
           <span>Grand Prix</span>
-          <span className="hidden text-right sm:block">
-            {mine ? "Your pts" : ""}
-          </span>
-          <span className="text-right">{mine ? "Duel" : ""}</span>
+          <span className="text-right">Model</span>
+          <span className="text-right">Beat it</span>
+          {mine && (
+            <>
+              <span className="hidden text-right sm:block">You</span>
+              <span className="text-right">Duel</span>
+            </>
+          )}
         </div>
 
         <ol className="border-b border-line">
@@ -74,11 +81,13 @@ export default function SeasonRaces({
                   ? { letter: "D", tone: "text-amber-300" }
                   : { letter: "L", tone: "text-race" }
               : null;
+            const modelPts = model.get(r.id);
+            const f = field.get(r.id);
             return (
               <li key={r.id} className="border-t border-line">
                 <Link
                   href={`/game/races/${r.round}`}
-                  className="group grid grid-cols-[2rem_minmax(0,1fr)_3.5rem] items-center gap-x-4 rounded-control px-2 py-3 transition-colors hover:bg-glass sm:grid-cols-[2.75rem_minmax(0,1fr)_5rem_3.5rem] sm:gap-x-6"
+                  className={`group grid ${cols} items-center gap-x-3 rounded-control px-2 py-3 transition-colors hover:bg-glass sm:gap-x-6`}
                 >
                   <span className="font-mono text-sm text-ink-mute tabular-nums">
                     {String(r.round).padStart(2, "0")}
@@ -91,9 +100,30 @@ export default function SeasonRaces({
                       {r.circuit ?? "Grand Prix"}
                     </span>
                   </span>
+                  <span className="text-right font-mono text-sm text-ink-dim tabular-nums">
+                    {modelPts === undefined ? "—" : formatPoints(modelPts)}
+                  </span>
+                  {/* "3 / 6": the players who beat it over the players who
+                      entered. Nobody entered is a dash, not "0 / 0". */}
+                  <span
+                    className={`text-right font-mono text-sm tabular-nums ${
+                      f && f.players > 0 && f.beat > 0
+                        ? "text-emerald-400"
+                        : "text-ink-mute"
+                    }`}
+                  >
+                    {f && f.players > 0 ? (
+                      <>
+                        {f.beat}
+                        <span className="text-ink-mute"> / {f.players}</span>
+                      </>
+                    ) : (
+                      "—"
+                    )}
+                  </span>
                   {/* Signed out there is no "your" anything, and two empty
                       columns would be a table promising data it has none
-                      of — the row is the race and nothing else. */}
+                      of. */}
                   {mine && (
                     <>
                       <span className="hidden text-right font-mono text-sm tabular-nums sm:block">

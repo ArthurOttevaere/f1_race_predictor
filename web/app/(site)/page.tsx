@@ -198,11 +198,25 @@ export default async function Home() {
           <span className="font-mono text-[0.65rem] tracking-[0.18em] text-ink-mute uppercase transition-colors group-hover:text-ink-dim sm:text-ink-dim sm:group-hover:text-ink">
             <span className="sm:hidden">Scroll down</span>
             <span className="hidden sm:inline">
-              {lastRace ? (
+              {/* The model's season, not its last Sunday. "2 of 10 exact"
+                  was the truth about a race told in the one way that made a
+                  fair race sound like a bad one; the cue now says what the
+                  machine averages and what it has done at best, which is the
+                  claim a challenger actually has to beat. The race itself is
+                  the section this points at. */}
+              {lastRace?.form ? (
                 <>
-                  Last time out it scored {formatPoints(lastRace.total)} ·{" "}
-                  {lastRace.exact} of 10 exact
+                  It averages {formatPoints(Number(lastRace.form.average.toFixed(1)))} a
+                  Grand Prix
+                  {lastRace.form.best && (
+                    <>
+                      {" "}· best {formatPoints(lastRace.form.best.points)} at the{" "}
+                      {lastRace.form.best.raceName.replace(" Grand Prix", "")} GP
+                    </>
+                  )}
                 </>
+              ) : lastRace ? (
+                <>Last time out it scored {formatPoints(lastRace.total)}</>
               ) : (
                 <>How the duel works</>
               )}
