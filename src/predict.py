@@ -29,6 +29,8 @@ from sklearn.preprocessing import LabelEncoder
 import xgboost as xgb
 import lightgbm as lgb
 
+import openf1  # noqa: E402  (src/openf1.py — the timing feed, reachable from CI)
+
 # Silence les logs FastF1 (INFO/WARNING parasites quand une session n'existe pas
 # encore). FASTF1_VERBOSE=1 les rend : quand FastF1 échoue à charger une source,
 # il le dit en WARNING et continue sans lever — donc à CRITICAL un job de
@@ -109,22 +111,143 @@ def find_next_race(year):
 
 
 def load_qualifying(year, round_number):
-    """Charge les résultats de qualification. Retourne None si indisponible."""
+    """Charge les résultats de qualification. Retourne (None, {}) si indisponible.
+
+    FastF1 d'abord (le timing F1, plus Ergast pour les DriverId), OpenF1 en
+    secours : depuis GitHub Actions, le timing répond 403 et FastF1 rend une
+    table vide sans lever — c'est ce qui a laissé le modèle jouer chaque GP
+    2026 sans grille (ALMANAC §8.9). OpenF1 est le même flux, joignable.
+    """
     try:
         session = fastf1.get_session(year, round_number, 'Q')
         session.load(laps=False, telemetry=False, weather=True, messages=False)
         df = session.results.copy()
-        if df.empty:
-            return None, {}
-        weather = _weather_summary(session)
-        return df, weather
+        if not df.empty and df['DriverId'].astype(str).str.strip().ne('').any():
+            return df, _weather_summary(session)
+        print("  [INFO] Qualifs FastF1 vides — essai via OpenF1")
     except Exception as e:
-        print(f"  [INFO] Qualifs non disponibles: {e}")
+        print(f"  [INFO] Qualifs FastF1 non disponibles: {e} — essai via OpenF1")
+    return _openf1_qualifying(year, round_number)
+
+
+def _driver_ids_for(year, roster):
+    """{numéro: (DriverId, code)} : le slug Ergast vient du roster Jolpica
+    (code et numéro permanent), à défaut de l'historique features.csv."""
+    ids = openf1.ergast_driver_ids(year)
+    by_code, by_number = ids['by_code'], ids['by_number']
+    if not by_code:
+        try:
+            hist = pd.read_csv(os.path.join(DATA, 'features.csv'))
+            hist = hist[hist['Season'] >= year - 1].sort_values(['Season', 'Round'])
+            by_code = hist.groupby('Abbreviation')['DriverId'].last().to_dict()
+        except Exception:
+            by_code = {}
+    out = {}
+    for number, d in roster.items():
+        did = by_code.get(d['code']) or by_number.get(number)
+        out[number] = (did, d['code'])
+    return out
+
+
+def _openf1_qualifying(year, round_number):
+    """Qualifs depuis OpenF1, dans la forme que FastF1 aurait rendue : une
+    ligne par pilote avec DriverId, TeamName, Abbreviation, Position, Q1/Q2/Q3
+    (secondes) et GridPosition NaN (la grille n'existe qu'en course)."""
+    try:
+        race_at = openf1.race_start(year, round_number)
+        if race_at is None:
+            print("  [INFO] OpenF1 : date de course inconnue")
+            return None, {}
+        session = openf1.weekend_session(year, race_at, 'Qualifying')
+        if session is None:
+            print("  [INFO] OpenF1 : pas de session de qualification listée")
+            return None, {}
+        key = session['session_key']
+        results = openf1.qualifying(key)
+        if not results:
+            print("  [INFO] OpenF1 : qualifs pas encore publiées")
+            return None, {}
+        roster = openf1.drivers(key)
+        ids = _driver_ids_for(year, roster)
+        rows = []
+        for r in results:
+            did, code = ids.get(r['number'], (None, None))
+            info = roster.get(r['number'], {})
+            rows.append({
+                'DriverNumber': str(r['number']),
+                'Abbreviation': code or info.get('code'),
+                'DriverId': did,
+                'TeamName': info.get('team'),
+                'FullName': info.get('full_name'),
+                'Position': float(r['position']) if r['position'] is not None else np.nan,
+                'GridPosition': np.nan,
+                'Q1': r['q1'], 'Q2': r['q2'], 'Q3': r['q3'],
+            })
+        df = pd.DataFrame(rows)
+        missing = df['DriverId'].isna().sum()
+        if missing:
+            print(f"  [INFO] OpenF1 : {missing} pilote(s) sans DriverId Ergast, ignoré(s)")
+        print(f"  → Qualifs chargées depuis OpenF1 ({len(df)} pilotes)")
+        return df, openf1.weather_summary(key)
+    except openf1.OpenF1Error as e:
+        print(f"  [INFO] OpenF1 indisponible: {e}")
         return None, {}
 
 
+def _openf1_practice(year, round_number):
+    """Essais libres depuis OpenF1 (FP3, sinon FP2, sinon FP1) — mêmes
+    colonnes que le chemin FastF1 : Driver, BestLapTime, AvgLapTime,
+    LapCount, GapToFastest, DriverId, TeamName. Tours de sortie des stands
+    exclus, comme ils n'ont jamais de temps chez FastF1."""
+    try:
+        race_at = openf1.race_start(year, round_number)
+        if race_at is None:
+            return None, {}, None
+        for label, name in (('FP3', 'Practice 3'), ('FP2', 'Practice 2'),
+                            ('FP1', 'Practice 1')):
+            session = openf1.weekend_session(year, race_at, name)
+            if session is None:
+                continue
+            key = session['session_key']
+            laps = openf1.lap_times(key)
+            if not laps:
+                continue
+            roster = openf1.drivers(key)
+            ids = _driver_ids_for(year, roster)
+            rows = []
+            for number, times in laps.items():
+                did, code = ids.get(number, (None, None))
+                rows.append({
+                    'Driver': code or roster.get(number, {}).get('code'),
+                    'BestLapTime': min(times),
+                    'AvgLapTime': sum(times) / len(times),
+                    'LapCount': len(times),
+                    'DriverId': did,
+                    'TeamName': roster.get(number, {}).get('team'),
+                })
+            stats = pd.DataFrame(rows)
+            stats['GapToFastest'] = stats['BestLapTime'] - stats['BestLapTime'].min()
+            print(f"  → Données practice chargées depuis OpenF1 {label} ({len(stats)} pilotes avec tours)")
+            return stats, openf1.weather_summary(key), label
+    except openf1.OpenF1Error as e:
+        print(f"  [INFO] OpenF1 indisponible: {e}")
+    return None, {}, None
+
+
 def load_practice(year, round_number):
-    """Charge FP3 (ou FP1 si FP3 indisponible). Retourne stats par pilote."""
+    """Charge FP3 (ou FP1 si FP3 indisponible). Retourne stats par pilote.
+
+    FastF1 d'abord, OpenF1 en secours — voir `load_qualifying`. Les tours
+    d'essais sont timing-only : sans ce secours, depuis GitHub Actions le
+    modèle n'a jamais vu un seul tour d'essais libres.
+    """
+    stats, weather, fp = _fastf1_practice(year, round_number)
+    if stats is not None:
+        return stats, weather, fp
+    return _openf1_practice(year, round_number)
+
+
+def _fastf1_practice(year, round_number):
     for fp in ('FP3', 'FP2', 'FP1'):
         try:
             session = fastf1.get_session(year, round_number, fp)

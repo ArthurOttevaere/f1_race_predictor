@@ -72,6 +72,13 @@ def _load_session(year, round_number, session_type):
     df = session.results.copy()
     if df.empty:
         return None
+    # DriverId is the Ergast slug and every downstream merge keys on it. When
+    # timing has the session but Ergast has not published it yet, FastF1 hands
+    # back a full table with DriverId NaN throughout — 22 rows that would join
+    # to everything. Treat that as "not published", exactly like an empty table.
+    ids = df['DriverId'] if 'DriverId' in df.columns else pd.Series(dtype=object)
+    if ids.isna().all() or ids.astype(str).str.strip().eq('').all():
+        return None
 
     df = df.drop(columns=[c for c in _DROP_COLS if c in df.columns])
     df.insert(0, 'Season',      year)
