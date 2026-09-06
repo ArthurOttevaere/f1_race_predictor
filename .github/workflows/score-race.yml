@@ -10,6 +10,11 @@ on:
     # window is what guarantees the Ergast re-score is never slept through.
     - cron: "45 * * * *"
   workflow_dispatch:
+    inputs:
+      verbose:
+        description: "Show FastF1's own INFO/WARNING output (why a source failed)"
+        type: boolean
+        default: false
 
 concurrency:
   group: game-jobs
@@ -59,3 +64,7 @@ jobs:
           MAIL_FROM: ${{ vars.MAIL_FROM }}
           MAIL_REPLY_TO: ${{ vars.MAIL_REPLY_TO }}
           SITE_URL: ${{ vars.SITE_URL }}
+          # src/predict.py silences FastF1 at CRITICAL, and FastF1 reports a
+          # source it could not load as a WARNING before carrying on — so a
+          # scoring pass with no data cannot say why. Tick this on a manual run.
+          FASTF1_VERBOSE: ${{ inputs.verbose && '1' || '' }}
