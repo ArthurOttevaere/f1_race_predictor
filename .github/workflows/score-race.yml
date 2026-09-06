@@ -2,12 +2,11 @@ name: score-race
 
 on:
   schedule:
-    # Hourly, every day (UTC). Sun-Tue was enough when the only source was
-    # Ergast and it happened to publish early in the week; it published on a
-    # Wednesday twice running instead, and the job was asleep from Tuesday
-    # night to the next Sunday — which is how a Grand Prix stayed unscored for
-    # nine days. Scoring now lands the same evening from F1 timing, and this
-    # window is what guarantees the Ergast re-score is never slept through.
+    # Hourly, every day (UTC). Ergast normally publishes within hours — the
+    # Dutch Grand Prix was scored and mailed 4h00 after lights out — so Sun-Tue
+    # covered the usual case. It does not cover a slow one: a race that lands
+    # on the Wednesday would have waited for the following Sunday. Running
+    # every day costs nothing on a public repo and removes that cliff.
     - cron: "45 * * * *"
   workflow_dispatch:
     inputs:

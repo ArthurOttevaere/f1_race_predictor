@@ -111,13 +111,7 @@ def score_race(race: dict) -> bool:
 def main() -> None:
     now = datetime.now(timezone.utc)
     locked = db.select("races", {"status": "eq.locked"})
-    # Three weeks, not ten days. A race is scored the same evening from F1
-    # timing (jobs/model_bridge.actual_classification), and Ergast — the
-    # reference that then supersedes it — has taken up to ten days to publish.
-    # A window that only just clears the slowest observed case is a window that
-    # eventually misses one, and a missed replay leaves the two sources
-    # disagreeing for good.
-    rescore_window = (now - timedelta(days=21)).isoformat()
+    rescore_window = (now - timedelta(days=10)).isoformat()
     recent = db.select("races", {"status": "eq.scored",
                                  "race_at": f"gte.{rescore_window}"})
     for race in locked + recent:
