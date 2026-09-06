@@ -11,11 +11,12 @@ export SUPABASE_SERVICE_KEY=<service_role secret>
 | Script | When | What |
 |---|---|---|
 | `sync_schedule.py` | weekly (Mon) | Calendar → `races`, roster → `drivers`, rank/prorate on new `season_picks` |
-| `lock_race.py` | hourly Fri–Sun | Model duel entry (order + probability matrix); flips race to `locked` at start |
-| `score_race.py` | hourly, daily | Official classification (F1 timing the same evening, Ergast when it publishes days later) → scores everyone, settles each duel (W/D/L), flips to `scored`, mails each player their result |
+| `lock_race.py` | every 15 min Fri–Sun | Model duel entry (order + probability matrix, qualifying and practice from FastF1 or OpenF1); flips race to `locked` at start; backfills an entry for a race locked without one |
+| `score_race.py` | every 15 min Sun–Mon, hourly otherwise | Official classification (OpenF1 within the hour, Ergast when it publishes) + safety car (OpenF1 race control) + Driver of the Day (formula1.com, `dotd.py`) → scores everyone, settles each duel (W/D/L), flips to `scored`, mails each player their result. `--rounds 1-13` re-scores any race, `--dry-run` writes nothing |
+| `dotd.py` | — | Reads the Driver of the Day from the article formula1.com links on the race hub; `None` rather than a guess when it can't |
 | `mailer.py` | — | The two race emails, sent from inside `lock_race` and `score_race` above (`docs/GAME_DESIGN.md` §2.7). No `RESEND_API_KEY` → every send is a logged no-op |
 | `send_mail.py` | manual, any time | **Sends a race email outside the schedule** — `python jobs/send_mail.py lock 12 --dry-run`. Same templates, same recipients, same log. `--force` re-sends to players who already got it; `--preview <email>` shows you the template when there are no players yet. Also runnable from Actions → **send-mail** |
-| `set_dotd.py` | manual, Monday | Record the official Driver of the Day, re-scores instantly |
+| `set_dotd.py` | manual, when `dotd.py` can't | Record the official Driver of the Day by hand, re-scores instantly |
 | `settle_season.py` | once, December | Awards championship-pick bonuses |
 | `backtest.py` | local only | Replays the scoring rules over past races (no DB needed) |
 | `admin.py` | manual, operator | The model's season score (status / reset / count-from / restore) and the player list (`players`, `delete-player`) |

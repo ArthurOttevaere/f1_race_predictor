@@ -114,6 +114,18 @@ def main() -> None:
             db.update("races", {"id": f"eq.{race['id']}"}, {"status": "locked"})
             print(f"round {race['round']}: LOCKED")
 
+    # A race locked with no entry at all used to be stuck for good: score_race
+    # refuses it ("run lock_race first") and this job only scanned 'scheduled'
+    # races, so nothing ever retried (ALMANAC §13.1 #1). Try again here, every
+    # run, until an entry exists — the race is over, so the qualifying data
+    # the model or the grid fallback need are as available as they will get.
+    for race in db.select("races", {"status": "eq.locked", "race_at": "not.is.null"}):
+        if db.select("model_entries", {"race_id": f"eq.{race['id']}"}):
+            continue
+        print(f"round {race['round']}: locked without a model entry — backfilling")
+        if not refresh_entry(race):
+            grid_fallback(race)
+
 
 if __name__ == "__main__":
     main()

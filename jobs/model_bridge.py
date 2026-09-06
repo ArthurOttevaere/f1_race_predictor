@@ -18,12 +18,14 @@ from __future__ import annotations
 
 import os
 import sys
+from datetime import datetime
 
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
+import openf1  # noqa: E402  (src/openf1.py)
 import predict as model  # noqa: E402  (src/predict.py)
 
 import db  # noqa: E402
@@ -153,38 +155,55 @@ def model_entry(season: int, rnd: int) -> dict:
     }
 
 
-def actual_classification(season: int, rnd: int) -> dict[str, int]:
-    """Official race classification as {driver_id: position}, {} if not in yet.
+def _race_session_key(season: int, race_at: str | None) -> int | None:
+    """OpenF1's key for the race session, or None if it doesn't list it."""
+    if not race_at:
+        return None
+    try:
+        session = openf1.race_session(season, datetime.fromisoformat(race_at))
+    except openf1.OpenF1Error as e:
+        print(f"  openf1: {e}")
+        return None
+    return session["session_key"] if session else None
+
+
+def actual_classification(season: int, rnd: int,
+                          race_at: str | None = None) -> tuple[dict[str, int], str]:
+    """Official race classification as ({driver_id: position}, source).
 
     Two sources, in this order, because they disagree only about *when*:
 
     1. **Ergast** — keyed by `driver_id` already, and the reference the model
-       has always trained against. It publishes days after the race.
-    2. **F1 live timing** — the same final classification, within the hour, but
-       keyed by driver code because the `driver_id` slug is an Ergast notion.
-       Only read once the FIA marks the session `Finalised`, so this is the
-       official result and not a provisional one.
+       has always trained against. Usually hours after the flag, sometimes
+       longer: the 2026 Italian Grand Prix was still unpublished six hours on.
+    2. **OpenF1** — the F1 timing feed's final classification, typically
+       within the hour of the chequered flag and reachable from GitHub
+       Actions (the timing host itself is not — ALMANAC §8.9). Keyed by
+       driver code, because the `driver_id` slug is an Ergast notion.
 
-    Ergast is usually quick — the 2026 Dutch Grand Prix was scored and mailed
-    four hours after lights out — but it is not guaranteed, and the Italian
-    Grand Prix was still unpublished five hours after the flag. Timing covers
-    that gap. Ergast still wins whenever it is there: the ten-day re-score
-    window in `jobs/score_race.py` replays a race scored from timing once
-    Ergast lands, so the two sources can never drift apart.
+    Ergast still wins whenever it is there: the ten-day re-score window in
+    `jobs/score_race.py` replays a race scored from OpenF1 once Ergast lands,
+    so the two sources can never end the season disagreeing.
 
-    Note that GitHub Actions runners cannot reach the F1 timing API at all, so
-    on CI this falls through to {} and scoring waits for Ergast (ALMANAC §8.9).
+    `source` is 'ergast', 'openf1' or '' (nothing yet).
     """
     official = model.load_actual_results(season, rnd)
     if official:
-        return official
+        return official, "ergast"
 
-    by_code = model.load_live_classification(season, rnd)
+    key = _race_session_key(season, race_at or _race_at_from_db(season, rnd))
+    if key is None:
+        return {}, ""
+    try:
+        by_code = openf1.classification(key)
+    except openf1.OpenF1Error as e:
+        print(f"  openf1: {e}")
+        return {}, ""
     if not by_code:
-        return {}
+        return {}, ""
 
-    # `drivers` is written by jobs/sync_schedule.py from the same FastF1 roster,
-    # so it is the season's own code → driver_id table rather than a mapping
+    # `drivers` is written by jobs/sync_schedule.py from the same roster, so it
+    # is the season's own code → driver_id table rather than a mapping
     # maintained by hand here.
     driver_id_for = {
         d["code"]: d["driver_id"]
@@ -195,13 +214,33 @@ def actual_classification(season: int, rnd: int) -> dict[str, int]:
     # at all — the same instinct as the prediction count check in score_race.
     unknown = sorted(set(by_code) - set(driver_id_for))
     if unknown:
-        print(f"round {rnd}: timing has unknown driver code(s) {unknown} — "
-              f"not scoring from timing, waiting for Ergast")
-        return {}
+        print(f"round {rnd}: OpenF1 has unknown driver code(s) {unknown} — "
+              f"not scoring from OpenF1, waiting for Ergast")
+        return {}, ""
 
-    return {driver_id_for[c]: p for c, p in by_code.items()}
+    return {driver_id_for[c]: p for c, p in by_code.items()}, "openf1"
 
 
-def safety_car_occurred(season: int, rnd: int) -> bool | None:
-    """True/False if a safety car was deployed, None if data isn't in yet."""
-    return model.safety_car_occurred(season, rnd)
+def _race_at_from_db(season: int, rnd: int) -> str | None:
+    rows = db.select("races", {"season": f"eq.{season}", "round": f"eq.{rnd}"})
+    return rows[0]["race_at"] if rows else None
+
+
+def safety_car_occurred(season: int, rnd: int,
+                        race_at: str | None = None) -> bool | None:
+    """True/False if a safety car (full or virtual) was deployed, None if race
+    control has published nothing yet — in which case nobody scores the bet
+    and the next pass asks again.
+
+    From OpenF1's race-control messages: FastF1's own read of them is
+    timing-only and therefore blank on Actions, which is why
+    `results.safety_car` was null on every race of 2026 until 2026-09.
+    """
+    key = _race_session_key(season, race_at or _race_at_from_db(season, rnd))
+    if key is None:
+        return None
+    try:
+        return openf1.safety_car(key)
+    except openf1.OpenF1Error as e:
+        print(f"  openf1: {e}")
+        return None

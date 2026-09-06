@@ -2,8 +2,11 @@ name: lock-race
 
 on:
   schedule:
-    # Hourly Fri-Sun (UTC): refresh the model entry post-quali, lock at race start.
-    - cron: "15 * * * 5,6,0"
+    # Every 15 minutes Fri-Sun (UTC): refresh the model entry once qualifying
+    # is in (OpenF1 publishes it within the hour), lock at race start. The
+    # lock itself is enforced by RLS at race_at whatever this cron does; the
+    # cadence is about how soon the model's picks go public after lights out.
+    - cron: "*/15 * * * 5,6,0"
   workflow_dispatch:
 
 concurrency:

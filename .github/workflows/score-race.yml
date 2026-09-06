@@ -2,14 +2,23 @@ name: score-race
 
 on:
   schedule:
-    # Hourly, every day (UTC). Ergast normally publishes within hours — the
-    # Dutch Grand Prix was scored and mailed 4h00 after lights out — so Sun-Tue
-    # covered the usual case. It does not cover a slow one: a race that lands
-    # on the Wednesday would have waited for the following Sunday. Running
-    # every day costs nothing on a public repo and removes that cliff.
-    - cron: "45 * * * *"
+    # Every 15 minutes on Sunday and Monday (UTC): OpenF1 carries the final
+    # classification within the hour of the flag, and the Driver of the Day
+    # follows on formula1.com — a quarter-hour cadence is what turns that
+    # into a result mail the same evening. Hourly the rest of the week, for
+    # the ten-day re-score window (Ergast supersedes, late DotD, late SC).
+    - cron: "*/15 * * * 0,1"
+    - cron: "45 * * * 2-6"
   workflow_dispatch:
     inputs:
+      rounds:
+        description: "Re-score these rounds whatever their age (e.g. 13, or 1-13). Empty = the scheduled pass."
+        type: string
+        required: false
+      dry_run:
+        description: "Dry run — compute and print, write nothing, mail nobody"
+        type: boolean
+        default: false
       verbose:
         description: "Show FastF1's own INFO/WARNING output (why a source failed)"
         type: boolean
@@ -53,7 +62,10 @@ jobs:
       - if: steps.guard.outputs.configured == 'true'
         run: pip install -r requirements.txt
       - if: steps.guard.outputs.configured == 'true'
-        run: python jobs/score_race.py
+        run: |
+          python -u jobs/score_race.py \
+            ${{ inputs.rounds != '' && format('--rounds {0}', inputs.rounds) || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}

@@ -138,9 +138,11 @@ and only a neutral grey if the roster knows neither (`web/lib/teams.ts`).
 
 Players may optionally vote for the official F1 "Driver of the Day" before race
 start (+5 if correct). This is a deliberate human-only edge in the duel: the
-model cannot vote. There is no official DotD API; the result is entered manually
-after the race (admin script / Supabase dashboard) and the bonus is applied on
-the next scoring pass.
+model cannot vote. There is no official DotD API; since 2026-09 the scoring job
+reads the winner from the "Driver of the Day" article formula1.com links on the
+race's hub page (`jobs/dotd.py`), on every pass until it finds one, and the
+bonus lands on that pass. When it can't — the site changed, a headline naming
+two drivers — `jobs/set_dotd.py` enters it by hand, and nothing is guessed.
 
 ### 2.5 Standings & duels
 
@@ -203,9 +205,12 @@ certain, smooth permanent tracks less so; it bets Yes at ≥ 50 %. A human beats
 it by reading the specific weekend — weather, grid tension, rookies — the way
 the rarity multiplier rewards reading a specific race.
 
-The outcome is detected automatically from the official race-control messages
-via FastF1 (`src/predict.py::safety_car_occurred`); if it can't be determined at
-scoring time, no one is awarded the bonus (neither player nor model).
+The outcome is detected automatically from the official race-control messages,
+read through OpenF1 (`src/openf1.py::safety_car`, via
+`jobs/model_bridge.py::safety_car_occurred`) — the timing host itself refuses
+GitHub Actions, which is how every race of 2026 went unsettled until 2026-09.
+If it can't be determined at scoring time, no one is awarded the bonus (neither
+player nor model) and the next pass asks again.
 
 ### 2.7 The two emails (added 2026-08)
 

@@ -9568,3 +9568,308 @@ Season,Round,EventName,Circuit,SessionType,EventDate,Driver,BestLapTime,AvgLapTi
 2026,7,Barcelona Grand Prix,Barcelona,FP3,2026-06-14,SAI,77.73,99.511733333,15,2.051,sainz,Williams,Carlos,Sainz,31.5,48.2,29.2,2.2,False
 2026,7,Barcelona Grand Prix,Barcelona,FP3,2026-06-14,STR,80.103,102.653076923,13,4.424,stroll,Aston Martin,Lance,Stroll,31.5,48.2,29.2,2.2,False
 2026,7,Barcelona Grand Prix,Barcelona,FP3,2026-06-14,VER,76.434,97.047125,8,0.755,max_verstappen,Red Bull Racing,Max,Verstappen,31.5,48.2,29.2,2.2,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,ALB,69.644,84.621814814,27,1.848,albon,Williams,Alexander,Albon,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,ALO,71.333,91.076277777,18,3.537,alonso,Aston Martin,Fernando,Alonso,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,ANT,67.796,80.195541666,24,0.0,antonelli,Mercedes,Kimi,Antonelli,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,ARO,69.646,89.325933333,15,1.85,,Audi,Paul,Aron,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,BEA,69.071,83.210722222,18,1.275,bearman,Haas F1 Team,Oliver,Bearman,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,BEG,69.054,86.949363636,22,1.258,,Ferrari,Dino,Beganovic,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,BOT,69.521,82.294125,16,1.725,bottas,Cadillac,Valtteri,Bottas,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,BRO,69.979,88.4364,25,2.183,,Williams,Luke,Browning,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,COL,68.962,91.850956521,23,1.166,colapinto,Alpine,Franco,Colapinto,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,CRA,71.202,90.602352941,17,3.406,,Aston Martin,Jak,Crawford,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,GAS,69.546,86.69147826,23,1.75,gasly,Alpine,Pierre,Gasly,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,HAD,69.481,106.82225,8,1.685,hadjar,Red Bull Racing,Isack,Hadjar,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,HAM,68.461,84.8714,20,0.665,hamilton,Ferrari,Lewis,Hamilton,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,HIR,70.493,88.869882352,17,2.697,,Haas F1 Team,Ryo,Hirakawa,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,HUL,69.165,80.50175,24,1.369,hulkenberg,Audi,Nico,Hulkenberg,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,IWA,69.637,86.692307692,13,1.841,,Racing Bulls,Ayumu,Iwasa,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,LIN,68.726,84.953071428,14,0.93,arvid_lindblad,Racing Bulls,Arvid,Lindblad,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,NOR,68.873,94.044428571,7,1.077,norris,McLaren,Lando,Norris,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,PER,71.283,87.876111111,9,3.487,perez,Cadillac,Sergio,Perez,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,PIA,67.913,84.774857142,21,0.117,piastri,McLaren,Oscar,Piastri,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,RUS,67.836,88.594518518,27,0.04,russell,Mercedes,George,Russell,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP1,2026-06-28,VER,68.077,88.043230769,13,0.281,max_verstappen,Red Bull Racing,Max,Verstappen,30.6,50.3,28.3,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,ALB,68.838,88.911551724,29,1.824,albon,Williams,Alexander,Albon,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,ALO,70.544,90.763956521,23,3.53,alonso,Aston Martin,Fernando,Alonso,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,ANT,67.014,87.49572,25,0.0,antonelli,Mercedes,Kimi,Antonelli,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,BEA,68.532,90.111851851,27,1.518,bearman,Haas F1 Team,Oliver,Bearman,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,BOR,68.3,85.99548,25,1.286,bortoleto,Audi,Gabriel,Bortoleto,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,BOT,71.307,102.608,4,4.293,bottas,Cadillac,Valtteri,Bottas,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,COL,68.831,90.3356,25,1.817,colapinto,Alpine,Franco,Colapinto,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,GAS,68.376,87.782310344,29,1.362,gasly,Alpine,Pierre,Gasly,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,HAD,67.758,96.567608695,23,0.744,hadjar,Red Bull Racing,Isack,Hadjar,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,HAM,67.611,93.88037931,29,0.597,hamilton,Ferrari,Lewis,Hamilton,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,HUL,68.559,84.365653846,26,1.545,hulkenberg,Audi,Nico,Hulkenberg,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,LAW,68.235,87.6077,30,1.221,lawson,Racing Bulls,Liam,Lawson,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,LEC,67.855,89.219774193,31,0.841,leclerc,Ferrari,Charles,Leclerc,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,LIN,68.378,80.7495,26,1.364,arvid_lindblad,Racing Bulls,Arvid,Lindblad,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,NOR,67.339,91.169,27,0.325,norris,McLaren,Lando,Norris,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,OCO,68.83,90.489071428,28,1.816,ocon,Haas F1 Team,Esteban,Ocon,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,PIA,67.251,91.167714285,28,0.237,piastri,McLaren,Oscar,Piastri,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,RUS,67.637,93.109681818,22,0.623,russell,Mercedes,George,Russell,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,SAI,69.131,88.530884615,26,2.117,sainz,Williams,Carlos,Sainz,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,STR,70.698,92.933642857,28,3.684,stroll,Aston Martin,Lance,Stroll,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP2,2026-06-28,VER,67.564,86.724625,24,0.55,max_verstappen,Red Bull Racing,Max,Verstappen,31.9,47.2,27.4,1.3,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,ALB,68.992,91.01940909,22,1.896,albon,Williams,Alexander,Albon,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,ALO,70.421,92.950611111,18,3.325,alonso,Aston Martin,Fernando,Alonso,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,ANT,67.134,91.552923076,13,0.038,antonelli,Mercedes,Kimi,Antonelli,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,BEA,68.529,92.321416666,12,1.433,bearman,Haas F1 Team,Oliver,Bearman,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,BOR,68.311,84.67317647,17,1.215,bortoleto,Audi,Gabriel,Bortoleto,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,BOT,69.74,85.193523809,21,2.644,bottas,Cadillac,Valtteri,Bottas,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,COL,68.394,91.339076923,13,1.298,colapinto,Alpine,Franco,Colapinto,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,GAS,68.193,89.803454545,11,1.097,gasly,Alpine,Pierre,Gasly,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,HAD,67.912,90.580875,24,0.816,hadjar,Red Bull Racing,Isack,Hadjar,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,HAM,67.211,98.238842105,19,0.115,hamilton,Ferrari,Lewis,Hamilton,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,HUL,68.303,86.3924375,16,1.207,hulkenberg,Audi,Nico,Hulkenberg,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,LAW,68.031,82.846823529,17,0.935,lawson,Racing Bulls,Liam,Lawson,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,LEC,67.452,94.3622,20,0.356,leclerc,Ferrari,Charles,Leclerc,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,LIN,68.109,83.0101,20,1.013,arvid_lindblad,Racing Bulls,Arvid,Lindblad,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,NOR,67.36,92.8868125,16,0.264,norris,McLaren,Lando,Norris,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,OCO,68.707,93.706363636,11,1.611,ocon,Haas F1 Team,Esteban,Ocon,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,PER,69.532,91.793076923,26,2.436,perez,Cadillac,Sergio,Perez,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,PIA,67.344,93.451692307,13,0.248,piastri,McLaren,Oscar,Piastri,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,RUS,67.096,96.0935,16,0.0,russell,Mercedes,George,Russell,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,SAI,68.843,88.978166666,24,1.747,sainz,Williams,Carlos,Sainz,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,STR,70.567,95.2146875,16,3.471,stroll,Aston Martin,Lance,Stroll,31.3,50.7,29.1,1.4,False
+2026,8,Austrian Grand Prix,Spielberg,FP3,2026-06-28,VER,67.369,100.208153846,13,0.273,max_verstappen,Red Bull Racing,Max,Verstappen,31.3,50.7,29.1,1.4,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,ALB,91.697,110.47028,25,2.437,albon,Williams,Alexander,Albon,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,ALO,92.957,111.67955,20,3.697,alonso,Aston Martin,Fernando,Alonso,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,ANT,89.473,104.344391304,23,0.213,antonelli,Mercedes,Kimi,Antonelli,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,BEA,91.373,104.45885,20,2.113,bearman,Haas F1 Team,Oliver,Bearman,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,BOR,91.035,109.271347826,23,1.775,bortoleto,Audi,Gabriel,Bortoleto,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,BOT,92.15,106.475411764,17,2.89,bottas,Cadillac,Valtteri,Bottas,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,COL,90.966,108.178869565,23,1.706,colapinto,Alpine,Franco,Colapinto,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,GAS,92.195,114.510333333,21,2.935,gasly,Alpine,Pierre,Gasly,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,HAD,90.338,103.413227272,22,1.078,hadjar,Red Bull Racing,Isack,Hadjar,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,HAM,89.26,106.51476,25,0.0,hamilton,Ferrari,Lewis,Hamilton,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,HUL,90.743,108.343916666,24,1.483,hulkenberg,Audi,Nico,Hulkenberg,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,LAW,90.85,107.31040909,22,1.59,lawson,Racing Bulls,Liam,Lawson,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,LEC,89.859,109.176851851,27,0.599,leclerc,Ferrari,Charles,Leclerc,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,LIN,91.339,105.27712,25,2.079,arvid_lindblad,Racing Bulls,Arvid,Lindblad,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,NOR,90.288,105.739954545,22,1.028,norris,McLaren,Lando,Norris,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,OCO,91.684,107.15145,20,2.424,ocon,Haas F1 Team,Esteban,Ocon,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,PER,92.241,107.214333333,18,2.981,perez,Cadillac,Sergio,Perez,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,PIA,90.147,111.980380952,21,0.887,piastri,McLaren,Oscar,Piastri,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,RUS,89.938,104.47944,25,0.678,russell,Mercedes,George,Russell,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,SAI,91.684,108.743655172,29,2.424,sainz,Williams,Carlos,Sainz,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,STR,93.13,115.6007,20,3.87,stroll,Aston Martin,Lance,Stroll,22.0,40.7,47.7,1.7,False
+2026,9,British Grand Prix,Silverstone,FP1,2026-07-05,VER,90.24,103.134619047,21,0.98,max_verstappen,Red Bull Racing,Max,Verstappen,22.0,40.7,47.7,1.7,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,ALB,109.337,116.728933333,15,2.267,albon,Williams,Alexander,Albon,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,ANT,107.603,115.912266666,15,0.533,antonelli,Mercedes,Kimi,Antonelli,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,BEA,109.01,124.891714285,14,1.94,bearman,Haas F1 Team,Oliver,Bearman,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,BOR,108.406,115.473,11,1.336,bortoleto,Audi,Gabriel,Bortoleto,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,BOT,109.839,125.4539375,16,2.769,bottas,Cadillac,Valtteri,Bottas,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,COL,109.403,119.025583333,12,2.333,colapinto,Alpine,Franco,Colapinto,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,CRA,113.199,117.31,11,6.129,,Aston Martin,Jak,Crawford,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,GAS,109.712,116.192133333,15,2.642,gasly,Alpine,Pierre,Gasly,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,HAD,107.322,115.156666666,15,0.252,hadjar,Red Bull Racing,Isack,Hadjar,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,HAM,107.215,112.235538461,13,0.145,hamilton,Ferrari,Lewis,Hamilton,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,HUL,108.962,117.91825,16,1.892,hulkenberg,Audi,Nico,Hulkenberg,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,LAW,108.432,115.4915,14,1.362,lawson,Racing Bulls,Liam,Lawson,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,LEC,107.277,117.145785714,14,0.207,leclerc,Ferrari,Charles,Leclerc,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,LIN,108.234,114.933,14,1.164,arvid_lindblad,Racing Bulls,Arvid,Lindblad,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,NOR,107.931,114.676636363,11,0.861,norris,McLaren,Lando,Norris,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,OCO,109.449,120.414538461,13,2.379,ocon,Haas F1 Team,Esteban,Ocon,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,PER,110.226,121.434857142,14,3.156,perez,Cadillac,Sergio,Perez,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,PIA,107.522,117.589285714,14,0.452,piastri,McLaren,Oscar,Piastri,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,RUS,107.959,118.931923076,13,0.889,russell,Mercedes,George,Russell,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,SAI,110.862,119.702466666,15,3.792,sainz,Williams,Carlos,Sainz,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,STR,112.808,119.67125,8,5.738,stroll,Aston Martin,Lance,Stroll,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP1,2026-07-19,VER,107.07,117.862166666,18,0.0,max_verstappen,Red Bull Racing,Max,Verstappen,24.0,39.5,42.3,1.8,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,ALB,108.019,118.936888888,9,2.075,albon,Williams,Alexander,Albon,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,ALO,111.418,121.608875,8,5.474,alonso,Aston Martin,Fernando,Alonso,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,ANT,105.944,117.496,9,0.0,antonelli,Mercedes,Kimi,Antonelli,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,BEA,107.792,114.412,6,1.848,bearman,Haas F1 Team,Oliver,Bearman,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,BOR,107.952,119.548,8,2.008,bortoleto,Audi,Gabriel,Bortoleto,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,BOT,109.199,119.348777777,9,3.255,bottas,Cadillac,Valtteri,Bottas,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,COL,107.147,120.278777777,9,1.203,colapinto,Alpine,Franco,Colapinto,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,GAS,107.36,121.903428571,7,1.416,gasly,Alpine,Pierre,Gasly,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,HAD,106.714,110.590777777,9,0.77,hadjar,Red Bull Racing,Isack,Hadjar,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,HAM,106.691,115.093,6,0.747,hamilton,Ferrari,Lewis,Hamilton,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,HUL,108.333,126.48,7,2.389,hulkenberg,Audi,Nico,Hulkenberg,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,LAW,107.434,119.138285714,7,1.49,lawson,Racing Bulls,Liam,Lawson,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,LEC,107.035,115.681,7,1.091,leclerc,Ferrari,Charles,Leclerc,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,LIN,107.294,118.0903,10,1.35,arvid_lindblad,Racing Bulls,Arvid,Lindblad,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,NOR,106.134,114.243428571,7,0.19,norris,McLaren,Lando,Norris,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,OCO,107.958,125.2292,10,2.014,ocon,Haas F1 Team,Esteban,Ocon,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,PER,109.596,118.404636363,11,3.652,perez,Cadillac,Sergio,Perez,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,PIA,106.926,119.29825,4,0.982,piastri,McLaren,Oscar,Piastri,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,RUS,107.229,122.355583333,12,1.285,russell,Mercedes,George,Russell,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,SAI,108.256,117.094111111,9,2.312,sainz,Williams,Carlos,Sainz,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,STR,111.131,121.54,7,5.187,stroll,Aston Martin,Lance,Stroll,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP2,2026-07-19,VER,106.416,115.72575,12,0.472,max_verstappen,Red Bull Racing,Max,Verstappen,24.0,33.1,42.3,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,ALB,107.99,114.66890909,11,2.0,albon,Williams,Alexander,Albon,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,ALO,110.155,121.058125,8,4.165,alonso,Aston Martin,Fernando,Alonso,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,ANT,105.99,118.579,5,0.0,antonelli,Mercedes,Kimi,Antonelli,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,BEA,107.92,114.036153846,13,1.93,bearman,Haas F1 Team,Oliver,Bearman,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,BOR,107.049,120.0701,10,1.059,bortoleto,Audi,Gabriel,Bortoleto,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,BOT,108.644,121.0415,16,2.654,bottas,Cadillac,Valtteri,Bottas,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,COL,107.904,113.946307692,13,1.914,colapinto,Alpine,Franco,Colapinto,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,GAS,107.949,115.657692307,13,1.959,gasly,Alpine,Pierre,Gasly,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,HAD,107.096,117.91,12,1.106,hadjar,Red Bull Racing,Isack,Hadjar,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,HAM,106.382,113.901818181,11,0.392,hamilton,Ferrari,Lewis,Hamilton,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,HUL,106.924,118.757333333,12,0.934,hulkenberg,Audi,Nico,Hulkenberg,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,LAW,107.294,120.002823529,17,1.304,lawson,Racing Bulls,Liam,Lawson,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,LEC,106.75,119.825666666,9,0.76,leclerc,Ferrari,Charles,Leclerc,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,LIN,107.176,115.307785714,14,1.186,arvid_lindblad,Racing Bulls,Arvid,Lindblad,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,NOR,106.129,111.417384615,13,0.139,norris,McLaren,Lando,Norris,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,OCO,108.73,114.782692307,13,2.74,ocon,Haas F1 Team,Esteban,Ocon,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,PER,108.99,119.015571428,14,3.0,perez,Cadillac,Sergio,Perez,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,PIA,106.785,113.5315,12,0.795,piastri,McLaren,Oscar,Piastri,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,RUS,106.357,117.616666666,6,0.367,russell,Mercedes,George,Russell,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,SAI,108.692,117.318538461,13,2.702,sainz,Williams,Carlos,Sainz,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,STR,110.631,120.31175,8,4.641,stroll,Aston Martin,Lance,Stroll,20.3,34.2,59.2,1.4,False
+2026,10,Belgian Grand Prix,Spa-Francorchamps,FP3,2026-07-19,VER,106.138,115.788166666,6,0.148,max_verstappen,Red Bull Racing,Max,Verstappen,20.3,34.2,59.2,1.4,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,ALB,81.819,95.5615,22,2.744,albon,Williams,Alexander,Albon,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,ALO,81.55,97.428705882,17,2.475,alonso,Aston Martin,Fernando,Alonso,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,ARO,82.168,97.740869565,23,3.093,,Alpine,Paul,Aron,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,BOR,80.36,96.78316,25,1.285,bortoleto,Audi,Gabriel,Bortoleto,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,FOR,81.89,101.073541666,24,2.815,,McLaren,Leonardo,Fornaroli,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,GAS,81.704,100.537192307,26,2.629,gasly,Alpine,Pierre,Gasly,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,HAD,79.997,96.1203,20,0.922,hadjar,Red Bull Racing,Isack,Hadjar,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,HAM,79.618,90.3795625,16,0.543,hamilton,Ferrari,Lewis,Hamilton,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,HER,83.118,100.929,23,4.043,,Cadillac,Colton,Herta,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,HIR,82.001,107.054,19,2.926,,Haas F1 Team,Ryo,Hirakawa,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,HUL,80.623,97.788260869,23,1.548,hulkenberg,Audi,Nico,Hulkenberg,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,LAW,80.866,97.550375,24,1.791,lawson,Racing Bulls,Liam,Lawson,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,LEC,79.075,97.795642857,14,0.0,leclerc,Ferrari,Charles,Leclerc,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,LIN,80.76,95.454708333,24,1.685,arvid_lindblad,Racing Bulls,Arvid,Lindblad,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,NOR,81.024,94.638619047,21,1.949,norris,McLaren,Lando,Norris,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,OCO,81.051,103.622833333,18,1.976,ocon,Haas F1 Team,Esteban,Ocon,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,PER,82.089,92.075117647,17,3.014,perez,Cadillac,Sergio,Perez,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,RUS,80.066,101.794470588,17,0.991,russell,Mercedes,George,Russell,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,SAI,83.734,101.533444444,18,4.659,sainz,Williams,Carlos,Sainz,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,STR,83.471,97.474714285,7,4.396,stroll,Aston Martin,Lance,Stroll,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,VER,79.559,95.3155,22,0.484,max_verstappen,Red Bull Racing,Max,Verstappen,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP1,2026-07-26,VES,80.467,97.955315789,19,1.392,,Mercedes,Frederik,Vesti,23.3,42.7,29.6,1.8,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,ALB,80.973,95.607137931,29,2.244,albon,Williams,Alexander,Albon,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,ALO,81.348,97.9255,20,2.619,alonso,Aston Martin,Fernando,Alonso,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,ANT,80.693,98.96064,25,1.964,antonelli,Mercedes,Kimi,Antonelli,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,BEA,80.95,99.119869565,23,2.221,bearman,Haas F1 Team,Oliver,Bearman,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,BOR,80.474,99.634130434,23,1.745,bortoleto,Audi,Gabriel,Bortoleto,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,BOT,81.442,100.467481481,27,2.713,bottas,Cadillac,Valtteri,Bottas,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,COL,82.105,104.22325,8,3.376,colapinto,Alpine,Franco,Colapinto,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,GAS,80.816,99.995368421,19,2.087,gasly,Alpine,Pierre,Gasly,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,HAD,79.8,102.5435,14,1.071,hadjar,Red Bull Racing,Isack,Hadjar,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,HAM,78.729,92.632105263,19,0.0,hamilton,Ferrari,Lewis,Hamilton,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,HUL,80.125,96.17504,25,1.396,hulkenberg,Audi,Nico,Hulkenberg,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,LAW,80.041,96.5758,25,1.312,lawson,Racing Bulls,Liam,Lawson,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,LEC,78.877,93.798375,24,0.148,leclerc,Ferrari,Charles,Leclerc,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,LIN,80.253,93.887304347,23,1.524,arvid_lindblad,Racing Bulls,Arvid,Lindblad,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,NOR,79.228,94.211807692,26,0.499,norris,McLaren,Lando,Norris,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,OCO,80.557,98.350826086,23,1.828,ocon,Haas F1 Team,Esteban,Ocon,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,PER,81.792,95.351318181,22,3.063,perez,Cadillac,Sergio,Perez,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,PIA,80.101,95.75740909,22,1.372,piastri,McLaren,Oscar,Piastri,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,RUS,79.662,94.97948,25,0.933,russell,Mercedes,George,Russell,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,SAI,81.426,93.233961538,26,2.697,sainz,Williams,Carlos,Sainz,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP2,2026-07-26,VER,79.421,93.863375,24,0.692,max_verstappen,Red Bull Racing,Max,Verstappen,23.6,30.3,30.5,1.7,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,ALB,80.623,112.417375,8,2.684,albon,Williams,Alexander,Albon,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,ALO,80.393,93.65175,12,2.454,alonso,Aston Martin,Fernando,Alonso,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,ANT,78.068,100.19490909,11,0.129,antonelli,Mercedes,Kimi,Antonelli,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,BEA,80.312,110.208636363,11,2.373,bearman,Haas F1 Team,Oliver,Bearman,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,BOR,79.338,102.786352941,17,1.399,bortoleto,Audi,Gabriel,Bortoleto,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,BOT,81.299,106.441272727,11,3.36,bottas,Cadillac,Valtteri,Bottas,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,COL,80.055,93.8755,22,2.116,colapinto,Alpine,Franco,Colapinto,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,GAS,79.723,100.89417647,17,1.784,gasly,Alpine,Pierre,Gasly,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,HAD,78.943,99.04975,12,1.004,hadjar,Red Bull Racing,Isack,Hadjar,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,HAM,78.056,100.447111111,18,0.117,hamilton,Ferrari,Lewis,Hamilton,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,HUL,79.16,95.954611111,18,1.221,hulkenberg,Audi,Nico,Hulkenberg,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,LAW,79.088,98.003944444,18,1.149,lawson,Racing Bulls,Liam,Lawson,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,LEC,78.291,95.567315789,19,0.352,leclerc,Ferrari,Charles,Leclerc,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,LIN,79.895,98.5016,5,1.956,arvid_lindblad,Racing Bulls,Arvid,Lindblad,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,NOR,77.939,96.783933333,15,0.0,norris,McLaren,Lando,Norris,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,OCO,80.295,108.3395625,16,2.356,ocon,Haas F1 Team,Esteban,Ocon,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,PIA,78.438,100.555470588,17,0.499,piastri,McLaren,Oscar,Piastri,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,RUS,78.541,106.815333333,15,0.602,russell,Mercedes,George,Russell,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,SAI,80.66,107.430533333,15,2.721,sainz,Williams,Carlos,Sainz,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,STR,80.933,100.316470588,17,2.994,stroll,Aston Martin,Lance,Stroll,24.9,52.1,28.6,1.6,False
+2026,11,Hungarian Grand Prix,Budapest,FP3,2026-07-26,VER,78.656,103.227090909,11,0.717,max_verstappen,Red Bull Racing,Max,Verstappen,24.9,52.1,28.6,1.6,False
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,ALB,75.357,94.6208,30,2.408,albon,Williams,Alexander,Albon,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,ALO,74.511,87.556761904,21,1.562,alonso,Aston Martin,Fernando,Alonso,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,ANT,72.949,90.266774193,31,0.0,antonelli,Mercedes,Kimi,Antonelli,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,BEA,74.874,94.118464285,28,1.925,bearman,Haas F1 Team,Oliver,Bearman,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,BOR,73.992,93.22948,25,1.043,bortoleto,Audi,Gabriel,Bortoleto,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,BOT,75.58,93.218666666,24,2.631,bottas,Cadillac,Valtteri,Bottas,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,COL,74.826,95.506107142,28,1.877,colapinto,Alpine,Franco,Colapinto,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,GAS,73.911,94.187166666,24,0.962,gasly,Alpine,Pierre,Gasly,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,HAM,73.139,93.536333333,30,0.19,hamilton,Ferrari,Lewis,Hamilton,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,HUL,73.784,89.8298,30,0.835,hulkenberg,Audi,Nico,Hulkenberg,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,LAW,74.861,90.97126923,26,1.912,lawson,Red Bull Racing,Liam,Lawson,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,LEC,73.238,87.880914285,35,0.289,leclerc,Ferrari,Charles,Leclerc,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,LIN,74.285,86.2866875,32,1.336,arvid_lindblad,Racing Bulls,Arvid,Lindblad,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,NOR,73.07,86.29508,25,0.121,norris,McLaren,Lando,Norris,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,OCO,74.897,94.513407407,27,1.948,ocon,Haas F1 Team,Esteban,Ocon,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,PER,75.7,91.845043478,23,2.751,perez,Cadillac,Sergio,Perez,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,PIA,73.608,91.82828125,32,0.659,piastri,McLaren,Oscar,Piastri,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,RUS,73.074,86.244625,32,0.125,russell,Mercedes,George,Russell,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,SAI,76.345,93.995214285,28,3.396,sainz,Williams,Carlos,Sainz,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,STR,75.199,92.2501,20,2.25,stroll,Aston Martin,Lance,Stroll,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,TSU,75.11,90.287,30,2.161,tsunoda,Racing Bulls,Yuki,Tsunoda,18.8,27.0,64.9,2.4,True
+2026,12,Dutch Grand Prix,Zandvoort,FP1,2026-08-23,VER,74.325,87.20775,20,1.376,max_verstappen,Red Bull Racing,Max,Verstappen,18.8,27.0,64.9,2.4,True
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,ALO,85.78,104.725133333,15,2.772,,Aston Martin,Fernando,Alonso,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,ANT,83.644,96.09,22,0.636,,Mercedes,Kimi,Antonelli,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,ARO,84.177,112.196733333,15,1.169,,Alpine,Paul,Aron,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,BEA,84.646,104.028238095,21,1.638,,Haas F1 Team,Oliver,Bearman,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,BOR,84.006,99.9668125,16,0.998,,Audi,Gabriel,Bortoleto,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,BOT,85.984,100.653,23,2.976,,Cadillac,Valtteri,Bottas,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,BRO,84.74,100.89545,20,1.732,,Williams,Luke,Browning,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,COL,84.028,102.822,21,1.02,,Alpine,Franco,Colapinto,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,HAM,83.181,105.626190476,21,0.173,,Ferrari,Lewis,Hamilton,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,HER,89.922,109.357,2,6.914,,Cadillac,Colton,Herta,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,HUL,84.626,99.895428571,21,1.618,,Audi,Nico,Hulkenberg,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,IWA,84.873,101.8647,20,1.865,,Red Bull Racing,Ayumu,Iwasa,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,LAW,83.433,106.824818181,22,0.425,,Red Bull Racing,Liam,Lawson,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,LEC,83.008,101.45284,25,0.0,,Ferrari,Charles,Leclerc,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,LIN,83.802,100.863,24,0.794,,Racing Bulls,Arvid,Lindblad,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,NOR,83.719,101.248545454,22,0.711,,McLaren,Lando,Norris,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,OCO,85.852,105.34868421,19,2.844,,Haas F1 Team,Esteban,Ocon,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,PIA,84.184,102.84273913,23,1.176,,McLaren,Oscar,Piastri,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,RUS,83.312,103.556545454,22,0.304,,Mercedes,George,Russell,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,SAI,84.827,104.262454545,22,1.819,,Williams,Carlos,Sainz,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,STR,86.066,105.563631578,19,3.058,,Aston Martin,Lance,Stroll,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP1,2026-09-06,TSU,84.571,109.462347826,23,1.563,,Racing Bulls,Yuki,Tsunoda,31.0,51.3,38.3,1.1,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,ALB,83.853,99.452518518,27,1.294,,Williams,Alexander,Albon,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,ALO,85.027,103.892933333,15,2.468,,Aston Martin,Fernando,Alonso,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,ANT,82.7,94.248851851,27,0.141,,Mercedes,Kimi,Antonelli,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,BEA,83.37,99.3677,20,0.811,,Haas F1 Team,Oliver,Bearman,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,BOR,83.776,109.085210526,19,1.217,,Audi,Gabriel,Bortoleto,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,BOT,85.149,104.09688,25,2.59,,Cadillac,Valtteri,Bottas,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,COL,83.619,103.895173913,23,1.06,,Alpine,Franco,Colapinto,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,GAS,83.773,102.153833333,24,1.214,,Alpine,Pierre,Gasly,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,HAM,83.016,101.040714285,21,0.457,,Ferrari,Lewis,Hamilton,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,HUL,83.732,101.9868,25,1.173,,Audi,Nico,Hulkenberg,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,LAW,83.66,94.185575757,33,1.101,,Red Bull Racing,Liam,Lawson,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,LEC,82.679,96.9735,22,0.12,,Ferrari,Charles,Leclerc,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,LIN,83.349,98.624086956,23,0.79,,Racing Bulls,Arvid,Lindblad,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,NOR,82.943,100.414523809,21,0.384,,McLaren,Lando,Norris,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,OCO,84.407,102.582913043,23,1.848,,Haas F1 Team,Esteban,Ocon,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,PER,85.082,99.407782608,23,2.523,,Cadillac,Sergio,Perez,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,PIA,83.028,105.508818181,22,0.469,,McLaren,Oscar,Piastri,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,RUS,82.559,103.931,26,0.0,,Mercedes,George,Russell,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,SAI,83.9,103.164481481,27,1.341,,Williams,Carlos,Sainz,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,STR,85.253,105.288954545,22,2.694,,Aston Martin,Lance,Stroll,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,TSU,83.455,105.5596,25,0.896,,Racing Bulls,Yuki,Tsunoda,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP2,2026-09-06,VER,83.377,100.32208,25,0.818,,Red Bull Racing,Max,Verstappen,33.7,54.9,30.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,ALB,84.437,94.407230769,26,2.218,,Williams,Alexander,Albon,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,ALO,84.919,111.298882352,17,2.7,,Aston Martin,Fernando,Alonso,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,ANT,82.58,103.995818181,11,0.361,,Mercedes,Kimi,Antonelli,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,BEA,83.585,110.551764705,17,1.366,,Haas F1 Team,Oliver,Bearman,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,BOR,83.298,118.223705882,17,1.079,,Audi,Gabriel,Bortoleto,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,BOT,85.004,110.247,15,2.785,,Cadillac,Valtteri,Bottas,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,COL,83.101,101.436578947,19,0.882,,Alpine,Franco,Colapinto,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,GAS,82.898,99.27605,20,0.679,,Alpine,Pierre,Gasly,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,HAM,82.445,110.241933333,15,0.226,,Ferrari,Lewis,Hamilton,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,HUL,83.126,116.047222222,18,0.907,,Audi,Nico,Hulkenberg,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,LAW,83.203,106.05325,20,0.984,,Red Bull Racing,Liam,Lawson,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,LEC,82.708,106.3973125,16,0.489,,Ferrari,Charles,Leclerc,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,LIN,82.724,102.798058823,17,0.505,,Racing Bulls,Arvid,Lindblad,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,NOR,82.625,105.326357142,14,0.406,,McLaren,Lando,Norris,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,OCO,84.02,108.589157894,19,1.801,,Haas F1 Team,Esteban,Ocon,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,PER,85.031,116.8555,14,2.812,,Cadillac,Sergio,Perez,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,PIA,82.773,114.646352941,17,0.554,,McLaren,Oscar,Piastri,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,RUS,82.219,99.846125,8,0.0,,Mercedes,George,Russell,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,SAI,83.875,103.929125,24,1.656,,Williams,Carlos,Sainz,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,STR,85.555,114.4523125,16,3.336,,Aston Martin,Lance,Stroll,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,TSU,83.817,102.249666666,12,1.598,,Racing Bulls,Yuki,Tsunoda,31.3,51.5,40.8,1.2,False
+2026,13,Italian Grand Prix,Monza,FP3,2026-09-06,VER,82.569,110.88555,20,0.35,,Red Bull Racing,Max,Verstappen,31.3,51.5,40.8,1.2,False
