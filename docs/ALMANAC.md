@@ -1769,6 +1769,16 @@ those in a second wave scoped to the hundred rows on screen: `season_picks`
 and `drivers` for the colour, `player_form` (migration 0012) for the strip. A
 missing `player_form` costs the column, not the page.
 
+*Telling the two lists apart* (2026-09-06). Once the board became a tower,
+the page was two hairline-ruled lists of the same weight and a reader could
+not tell the ranking from the archive. The board now carries a **The field**
+heading of its own — the page is called Standings, so the first heading used
+to be *Race by race*, which read as the caption for everything below it — and
+`SeasonRaces` gives up a weight class: one line a row instead of two, mono a
+step down, the circuit inline after the Grand Prix, softer rules, a chevron
+saying the row goes somewhere, and a rule plus a sentence of prose above it.
+DESIGN §7.5 carries the rule this left.
+
 *Race by race, for everyone* (2026-09-06). Signed out, the race list was a
 bare list of names — a table promising nothing. `SeasonRaces` now carries two
 public columns on every row: **Model** (its total, from `modelEntries`) and

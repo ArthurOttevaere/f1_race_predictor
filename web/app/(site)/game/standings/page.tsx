@@ -370,5 +370,19 @@ function Board({
   if (lines.length === 0) {
     return <EmptyBoard points={model.points} races={model.races} />;
   }
-  return <StandingsBoard lines={lines} />;
+  return (
+    <section>
+      {/* The page is called Standings and the board had no name of its own,
+          so the first heading a reader met was "Race by race" — which then
+          looked like the caption for everything under it. Naming the board
+          is half of telling the two lists apart; the other half is that the
+          archive is drawn a weight lighter (see SeasonRaces). */}
+      <h2 className="font-mono text-xs tracking-[0.2em] text-ink-dim uppercase">
+        The field
+      </h2>
+      <div className="mt-5">
+        <StandingsBoard lines={lines} />
+      </div>
+    </section>
+  );
 }
