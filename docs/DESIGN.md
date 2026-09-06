@@ -774,10 +774,12 @@ The phone hero is now a different composition rather than a narrower one:
 `jobs/build_circuit_traces.py` from FastF1 position telemetry — the fastest
 race lap at that venue — simplified and re-emitted as a closed Catmull-Rom
 spline in its own viewBox. So the ornament comes out of the same pipeline the
-model runs on, and it changes every second Sunday. A venue that has never been
-raced (a new circuit, a returning one) is simply absent from the file and the
-hero carries no ornament, which is better than carrying somebody else's
-circuit.
+model runs on, and it changes every second Sunday. A venue nobody has driven
+yet is simply absent from the file and the hero carries no ornament, which is
+better than carrying somebody else's circuit. "Driven", not "raced": the job
+takes a lap from practice or qualifying when a circuit is brand new and has no
+race behind it, so the blank window is the days before first practice rather
+than the entire debut weekend.
 
 **Line weight does not scale.** Every stroke is `vector-effect:
 non-scaling-stroke` — 1.75px for the track, 2.5px for the start line, at any

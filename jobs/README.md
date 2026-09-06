@@ -12,7 +12,7 @@ export SUPABASE_SERVICE_KEY=<service_role secret>
 |---|---|---|
 | `sync_schedule.py` | weekly (Mon) | Calendar → `races`, roster → `drivers`, rank/prorate on new `season_picks` |
 | `lock_race.py` | hourly Fri–Sun | Model duel entry (order + probability matrix); flips race to `locked` at start |
-| `score_race.py` | hourly Sun–Tue | Official classification → scores everyone, settles each duel (W/D/L), flips to `scored`, mails each player their result |
+| `score_race.py` | hourly, daily | Official classification (F1 timing the same evening, Ergast when it publishes days later) → scores everyone, settles each duel (W/D/L), flips to `scored`, mails each player their result |
 | `mailer.py` | — | The two race emails, sent from inside `lock_race` and `score_race` above (`docs/GAME_DESIGN.md` §2.7). No `RESEND_API_KEY` → every send is a logged no-op |
 | `send_mail.py` | manual, any time | **Sends a race email outside the schedule** — `python jobs/send_mail.py lock 12 --dry-run`. Same templates, same recipients, same log. `--force` re-sends to players who already got it; `--preview <email>` shows you the template when there are no players yet. Also runnable from Actions → **send-mail** |
 | `set_dotd.py` | manual, Monday | Record the official Driver of the Day, re-scores instantly |
@@ -47,7 +47,7 @@ because two idle timers can take the site down between seasons:
   `.github/keepalive`, and re-enables the schedules through the API as a
   fallback.
 - **Supabase** pauses a free project after **7 days with no database request**.
-  `score_race.py` normally covers this by querying `races` hourly on Sun–Tue,
+  `score_race.py` normally covers this by querying `races` hourly every day,
   but only while GitHub is still running it. Keepalive pings the database
   directly and fails loudly if it answers anything but 200, since a paused
   project needs a human in the dashboard.

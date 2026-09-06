@@ -165,14 +165,18 @@ Sun race_at     lock-race        first hourly run after lights out:
                                  → everyone's picks become publicly readable
    ↓
 Sun race_at+2h  score-race       FastF1 classification available?
-   (hourly Sun-Tue)              → score model, score every player,
+   (hourly, daily)               (F1 timing once the FIA marks the session
+                                  'Finalised' — Ergast is days behind)
+                                 → score model, score every player,
                                    write results + scores, status='scored'
    ↓
 Mon (manual)    set_dotd.py      enter the official Driver of the Day
                                  → immediate re-score (+5 where correct)
    ↓
-Sun-Tue passes  score-race       re-scores races scored in the last 10 days,
-                                 so a late DotD is always picked up
+hourly passes   score-race       re-scores races scored in the last 21 days,
+                                 so a late DotD is always picked up and the
+                                 Ergast classification supersedes the timing
+                                 one when it finally publishes
    ↓
 December        settle_season.py championship-pick bonuses awarded
 ```
@@ -1000,10 +1004,11 @@ correct stand-in for the starting grid (before penalties).
 > won't retry because it only scans `scheduled` races. Recovery is manual: set
 > `races.status='scheduled'` in SQL, run `lock-race`, then `score-race`.
 
-### 8.4 `score_race.py` — hourly Sun–Tue
+### 8.4 `score_race.py` — hourly, every day
 
 Processes every `locked` race, plus every `scored` race whose `race_at` is
-within the last 10 days (the re-score window that catches a late DotD).
+within the last 21 days (the re-score window that catches a late DotD and the
+late Ergast classification, §8.4.1).
 
 1. Refuse if `now < race_at + 2h` (race can't plausibly be over).
 2. Fetch the official classification; if empty, wait for the next pass.
@@ -1017,6 +1022,37 @@ within the last 10 days (the re-score window that catches a late DotD).
 8. Upsert `results`, set `races.status = 'scored'`.
 
 Fully idempotent — re-running recomputes identical rows.
+
+#### 8.4.1 Where the classification comes from
+
+Step 2 has two sources, tried in order, and they differ only in *when* they are
+available. `jobs/model_bridge.actual_classification` is the only place that
+knows about both.
+
+| Source | Keyed by | Available | Used |
+| --- | --- | --- | --- |
+| **Ergast** (`predict.load_actual_results`) | `driver_id` | days after the race — observed at 5–10 | first, whenever it answers |
+| **F1 live timing** (`predict.load_live_classification`) | driver code (`VER`) | within the hour | only when Ergast is still empty |
+
+Ergast alone is what the model has always trained against, and it is the
+reference. It is also far too slow to run a game on: rounds 11 and 12 of 2026
+were both classified on the **Wednesday nine days after the race**, so players
+spent most of the fortnight between Grands Prix looking at a home page that
+still showed the race as unscored, and their result email arrived a week and a
+half late. That is the bug this two-source read fixes.
+
+Timing is not a provisional read. `load_live_classification` returns `{}` until
+`session_status` contains **`Finalised`** — the FIA's own marker that the
+stewards are done and the classification is final — so a race under
+investigation is simply not scored yet. The driver code is translated to a
+`driver_id` through the season's `drivers` table (written by `sync_schedule`
+from the same FastF1 roster); a code that is not in that table aborts the whole
+read rather than scoring a partial field, the same instinct as the prediction
+count check in step 6.
+
+Because Ergast is preferred whenever present, the 21-day re-score window
+replays every timing-scored race against Ergast as soon as it publishes. The
+two sources therefore cannot end the season disagreeing.
 
 ### 8.5 The hand-run jobs: `set_dotd.py`, `settle_season.py`, `admin.py`
 
@@ -1064,7 +1100,7 @@ its season line says).
 | --- | --- | --- |
 | `sync-schedule.yml` | `0 5 * * 1` (Mon 05:00) | `sync_schedule.py` |
 | `lock-race.yml` | `15 * * * 5,6,0` (hourly Fri/Sat/Sun) | `lock_race.py` |
-| `score-race.yml` | `45 * * * 0,1,2` (hourly Sun/Mon/Tue) | `score_race.py` |
+| `score-race.yml` | `45 * * * *` (hourly, every day) | `score_race.py` |
 | `keepalive.yml` | `0 6 1 * *` (monthly) | commit + re-enable + DB ping |
 | `send-mail.yml` | none — manual only | `send_mail.py` (§8.8) |
 
@@ -1092,7 +1128,7 @@ Two idle timers can quietly kill this project between seasons:
    repository activity.** A workflow *run* is not activity — a **commit** is.
    So the crons cannot keep themselves alive.
 2. **Supabase pauses a free project after 7 days with no database request.**
-   `score-race` normally covers this by querying hourly Sun–Tue — but only
+   `score-race` normally covers this by querying hourly every day — but only
    while timer 1 hasn't already stopped it.
 
 Timer 1 is therefore the load-bearing one. Monthly (half the 60-day window, so
@@ -1131,7 +1167,7 @@ failed to save.
 
 | Property | How |
 | --- | --- |
-| Idempotent | `email_log(race_id, user_id, kind)` written after each success; `email_recipients()` excludes anyone already logged. `score-race` re-runs hourly for ten days — without the log that is ten days of hourly mail to every player. |
+| Idempotent | `email_log(race_id, user_id, kind)` written after each success; `email_recipients()` excludes anyone already logged. `score-race` re-runs hourly for three weeks — without the log that is three weeks of hourly mail to every player. |
 | Retryable | A failed send is **never** logged, so the next hourly run picks it up. Nothing is queued and nothing is retried in-process. |
 | Silent when unconfigured | No `RESEND_API_KEY` → `send()` prints and returns `False`. The jobs behave exactly as before. |
 | Non-fatal | A bad address returns `False` rather than raising. One bounce must not take down a scoring run. |
@@ -1154,7 +1190,7 @@ on an element rather than assumed.
 
 **Sending one by hand — `jobs/send_mail.py` and the `send-mail` workflow.**
 
-The crons are `lock-race` hourly Fri–Sun at :15 and `score-race` hourly Sun–Tue
+The crons are `lock-race` hourly Fri–Sun at :15 and `score-race` hourly daily
 at :45, so the nudge lands on the first run after qualifying + 1h30 and the
 result on the first run after the classification appears. When that is not
 enough — a weekend the job missed, a template you want to re-send, a test on
@@ -1353,9 +1389,11 @@ HTML whether or not the clock ever starts, and the placeholder holds the same
 width so hydration shifts nothing. Between seasons there is no race and no
 circuit: the grid collapses to one column, `.page-glow` stands in for the
 trace's light, and the line falls back to `2026 season · one duel per Grand
-Prix`. Same when the venue has never been raced — Madrid and Kuala Lumpur have
-no telemetry, so `circuitTrace()` returns null and the hero carries no
-ornament rather than somebody else's circuit.
+Prix`. Same when nobody has yet driven the venue — until first practice on the Friday,
+Madrid has no telemetry in existence, so `circuitTrace()` returns null and the
+hero carries no ornament rather than somebody else's circuit. Kuala Lumpur was
+in that list by accident — FastF1 files the Bahrain Grand Prix under that
+location — and `PREV_ALIAS` in the trace job now maps it back to Sakhir.
 
 The glass chip that used to sit above the headline is gone. It was a box doing
 an eyebrow's job, and it pushed the headline a third of the way down the hero.
@@ -1895,9 +1933,12 @@ Two of those carry a rule that is easy to undo by accident:
   the job when the calendar gains a venue: `python jobs/build_circuit_traces.py
   2026`. Two things in that job exist because of real bugs — it looks sessions
   up by **round number**, because FastF1's fuzzy name match answers "Madrid"
-  with the Miami Grand Prix; and it skips events whose date is still in the
-  future, because asking for telemetry that does not exist is a network
-  round-trip that times out, twenty times over. A venue with no lap yet is
+  with the Miami Grand Prix; and it skips events whose **first session** is
+  still in the future, because asking for telemetry that does not exist is a
+  network round-trip that times out, twenty times over. The gate is first
+  practice rather than the race so a brand-new venue is drawn on the Friday it
+  is first driven, instead of staying blank across the whole weekend it is new
+  — which is what happened to Madrid. A venue with no lap yet is
   absent from the file and the hero renders without a trace.
 - **Archivo is loaded with `axes: ["wdth"]`.** Drop that and the served
   `@font-face` loses its `font-stretch: 62% 125%`, and `.display` — the
@@ -2400,7 +2441,7 @@ index; that file is the manual.
 | Enter Driver of the Day | `python jobs/set_dotd.py <season> <round> <driver_id>` (Monday) |
 | Settle the season | `python jobs/settle_season.py <season>` (December, once) |
 | Force a lock / score now | Actions tab → workflow → **Run workflow** |
-| Re-score a race | It re-scores automatically for 10 days; otherwise set `races.status='locked'` in SQL and run `score-race` |
+| Re-score a race | It re-scores automatically for 21 days; otherwise set `races.status='locked'` in SQL and run `score-race` |
 | Refresh the model after new races | `python src/collect.py <year> --force` (+ `--practice`), `python src/features.py`, then optionally `python src/train.py` |
 | Validate a rules change | `python jobs/backtest.py 2026 --rounds 1-13` — `mirror` must draw every race |
 | Inspect players | `python jobs/admin.py players`, or the SQL editor query in §7.6 |
