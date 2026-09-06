@@ -1,10 +1,13 @@
-"""Record the official Driver of the Day for a race (manual, ~2 min on Monday).
+"""Record the official Driver of the Day for a race by hand.
 
 Run:  python jobs/set_dotd.py <season> <round> <driver_id>
 e.g.  python jobs/set_dotd.py 2026 13 max_verstappen
 
-There is no official DotD API, so this is entered by hand from formula1.com.
-The race is re-scored immediately so the +5 bonus lands right away.
+Since 2026-09 `score_race.py` reads the Driver of the Day itself, from the
+article formula1.com links on the race's hub page (`jobs/dotd.py`), on every
+pass until it finds one. This is the hand for when it doesn't — the site
+changed, the headline named two drivers, a name the roster can't match. The
+race is re-scored immediately so the +5 bonus lands right away.
 """
 
 from __future__ import annotations

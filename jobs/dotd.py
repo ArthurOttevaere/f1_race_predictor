@@ -145,7 +145,11 @@ def driver_from_slug(slug: str, roster: list[dict]) -> str | None:
         names = _tokens(d.get("full_name") or "")
         surname = _fold((d.get("full_name") or "").split()[-1]) if d.get("full_name") else ""
         for i, w in enumerate(words):
-            if w and (w == surname or (w in names and len(w) > 3)):
+            # Headlines are possessive as often as not: "verstappens-comeback",
+            # "antonellis-first-victory" — a trailing s is the same surname.
+            bare = w[:-1] if w.endswith("s") and len(w) > 4 else w
+            if w and (w == surname or bare == surname
+                      or (w in names and len(w) > 3)):
                 hits.append((i, d["driver_id"]))
                 break
     if not hits:

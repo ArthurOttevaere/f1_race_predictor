@@ -139,9 +139,11 @@ Key structural facts:
 
 | Service | Used by | Auth | What breaks without it |
 | --- | --- | --- | --- |
-| **FastF1** (→ F1 live timing API + Ergast mirrors) | `src/collect.py`, `src/predict.py`, `src/app.py`, `jobs/*` | none | Everything data-related: collection, prediction, locking, scoring |
+| **FastF1** (→ F1 live timing API + Ergast mirrors) | `src/collect.py`, `src/predict.py`, `src/app.py`, `jobs/*` | none | Collection, the reference classification, the local model page. Its timing half is **unreachable from GitHub Actions** (§8.9) |
+| **OpenF1** (`api.openf1.org`, `src/openf1.py`) | `src/predict.py`, `jobs/model_bridge.py`, `jobs/sync_schedule.py` | none (free tier: 3 req/s, 30 req/min) | Same-evening scoring, the safety car, the model's grid and practice on Actions, team colours — everything the timing host would give if it answered |
+| **formula1.com** (race hub pages, `jobs/dotd.py`) | `jobs/score_race.py` | none | The Driver of the Day; `set_dotd.py` by hand instead |
 | **Open-Meteo** (forecast + archive + geocoding) | `src/app.py` only | none (keyless) | Weather panel on the Flask page |
-| **Jolpica/Ergast** (`api.jolpi.ca`) | `jobs/sync_schedule.py`, `jobs/settle_season.py` | none | Championship-pick rank-at-lock and season settlement |
+| **Jolpica/Ergast** (`api.jolpi.ca`) | `jobs/sync_schedule.py`, `jobs/settle_season.py`, `src/openf1.py` (round → date, code → `driver_id`) | none | Championship-pick rank-at-lock, season settlement, the round-to-session bridge |
 | **Supabase** | `web/`, `jobs/` | anon key / service-role key | The entire game |
 | **Vercel** | hosting `web/` | GitHub OAuth | The site |
 | **GitHub Actions** | running `jobs/` | repo secrets | Model entries and scoring stop |
@@ -157,26 +159,31 @@ any time        player           opens /game, drags a top 10, picks DotD +
                                  (RLS: only while status='scheduled' and now < race_at)
    ↓
 Sat ~quali+1h30 lock-race        runs the model post-quali → model_entries
-   (hourly Fri-Sun)              (calibrated order + probability matrix)
+   (every 15 min Fri-Sun)        (calibrated order + probability matrix;
+                                  qualifying + practice from FastF1, or
+                                  OpenF1 when timing is unreachable — always,
+                                  on Actions) → the Saturday nudge mail
    ↓
-Sun race_at     lock-race        first hourly run after lights out:
+Sun race_at     lock-race        first run after lights out:
                                  races.status = 'locked'
                                  → RLS now refuses prediction writes
                                  → everyone's picks become publicly readable
    ↓
-Sun race_at+2h  score-race       FastF1 classification available?
-   (hourly, daily)               (F1 timing once the FIA marks the session
-                                  'Finalised' — Ergast is days behind)
+Sun race_at+2h  score-race       classification available?
+   (every 15 min Sun-Mon,        (Ergast first; else OpenF1, which carries
+    hourly Tue-Sat)               the timing feed's final result within
+                                  the hour) + safety car (OpenF1 race
+                                  control) + Driver of the Day (formula1.com)
                                  → score model, score every player,
                                    write results + scores, status='scored'
+                                 → the result mail, the same evening
    ↓
-Mon (manual)    set_dotd.py      enter the official Driver of the Day
-                                 → immediate re-score (+5 where correct)
+later passes    score-race       re-scores races scored in the last 10 days:
+                                 a Driver of the Day published later, race
+                                 control published later, and the Ergast
+                                 classification superseding OpenF1's
    ↓
-hourly passes   score-race       re-scores races scored in the last 10 days,
-                                 so a late DotD is always picked up and the
-                                 Ergast classification supersedes the timing
-                                 one when it finally publishes
+(manual)        set_dotd.py      only if dotd.py never finds the article
    ↓
 December        settle_season.py championship-pick bonuses awarded
 ```
@@ -975,7 +982,7 @@ python jobs/sync_schedule.py [season]     # defaults to the current year
    in the Jolpica standings and computes `prorate`. If the standings API is
    down it logs and retries next week rather than writing wrong tiers.
 
-### 8.3 `lock_race.py` — hourly Fri–Sun
+### 8.3 `lock_race.py` — every 15 minutes Fri–Sun
 
 For each `scheduled` race with a `race_at`, ordered ascending, stopping at
 anything more than 3 days out:
@@ -986,8 +993,13 @@ anything more than 3 days out:
 - **At/after `race_at`**: if there's still no entry, try once more; failing
   that, use the grid-order fallback; then set `races.status = 'locked'`.
 
-The 1h30 delay after qualifying is a pragmatic buffer for FastF1 to publish the
-session.
+The 1h30 delay after qualifying is a pragmatic buffer for the session to be
+published (OpenF1 has it within the hour; FastF1's Ergast read can take
+longer). The model's qualifying and practice reads (`predict.load_qualifying`,
+`load_practice`) try FastF1 first and OpenF1 second — on Actions that is
+always OpenF1, since the timing host answers 403 there (§8.9). Before
+2026-09-06 there was no second source, and every entry of the season was
+`pre_quali` (§13.1.1).
 
 **The fallback** (`quali_order()` + `grid_fallback()`) stores the qualifying
 classification as the model's entry, with an empty `prob_matrix` — so every
@@ -997,31 +1009,49 @@ with a null `DriverId`, which FastF1 emits for brand-new entrants. In a `Q`
 session `GridPosition` is NaN for everyone, so the qualifying order is the
 correct stand-in for the starting grid (before penalties).
 
-> ⚠️ **Residual gap.** If qualifying data is unavailable too, no entry is
-> stored — but `main()` locks the race regardless, which is right for fairness
-> (predictions must close at lights-out). `score_race.py` will then refuse that
-> race forever with "no model entry — run lock_race first", and `lock-race`
-> won't retry because it only scans `scheduled` races. Recovery is manual: set
-> `races.status='scheduled'` in SQL, run `lock-race`, then `score-race`.
+If qualifying data is unavailable too, no entry is stored — but `main()` locks
+the race regardless, which is right for fairness (predictions must close at
+lights-out). Since 2026-09-06 every run also scans `locked` races **without**
+an entry and tries again (model, then grid fallback) until one exists, so
+`score_race.py`'s "no model entry — run lock_race first" is a delay, not a
+dead end. Before that it was one (§13.1.1).
 
-### 8.4 `score_race.py` — hourly, every day
+### 8.4 `score_race.py` — every 15 minutes Sun–Mon, hourly the rest of the week
 
 Processes every `locked` race, plus every `scored` race whose `race_at` is
-within the last 10 days (the re-score window that catches a late DotD, and
-replays a timing-scored race against Ergast when it publishes, §8.4.1).
+within the last 10 days (the re-score window that catches a Driver of the Day
+or a safety car published later, and replays an OpenF1-scored race against
+Ergast when it publishes, §8.4.1).
 
 1. Refuse if `now < race_at + 2h` (race can't plausibly be over).
-2. Fetch the official classification; if empty, wait for the next pass.
-3. Require a `model_entries` row (otherwise: "run lock_race first").
-4. Detect the safety car (`None` = unknown → nobody scores that bonus).
-5. Score the model: `score_table` + its own SC bonus, written back to
+2. Fetch the official classification (§8.4.1); if empty, wait for the next pass.
+3. Require a `model_entries` row (otherwise: "run lock_race first" — and
+   `lock-race` now does, §8.3).
+4. Driver of the Day: the one on record, else `jobs/dotd.py` asks
+   formula1.com (§8.5); `None` until it publishes.
+5. Detect the safety car from OpenF1's race-control messages (`None` =
+   unknown → nobody scores that bonus, next pass asks again).
+6. Score the model: `score_table` + its own SC bonus, written back to
    `model_entries.total` / `.breakdown`.
-6. Read every prediction for the race, **verify the count against the server**,
+7. Read every prediction for the race, **verify the count against the server**,
    and abort loudly on mismatch rather than score a partial field.
-7. `finalize()` each player against the model total → upsert `scores`.
-8. Upsert `results`, set `races.status = 'scored'`.
+8. `finalize()` each player against the model total → upsert `scores`, then
+   the result mail (§8.8).
+9. Upsert `results` (classification, dotd, safety_car, `scored_at` = this
+   pass — it is a last-touch timestamp, not a classification date), set
+   `races.status = 'scored'`.
 
-Fully idempotent — re-running recomputes identical rows.
+Fully idempotent — re-running recomputes identical rows. Two switches for the
+operator, also on the Actions form:
+
+```bash
+python jobs/score_race.py --rounds 13             # one race, whatever its age
+python jobs/score_race.py --rounds 1-13 --dry-run # every total printed, nothing written, nobody mailed
+```
+
+`--rounds` is how the safety-car bet was settled retroactively on 2026-09-06
+for the twelve races it had silently skipped; `--dry-run` is how that was
+checked first, from the branch, before anything was written.
 
 #### 8.4.1 Where the classification comes from
 
@@ -1031,31 +1061,35 @@ knows about both.
 
 | Source | Keyed by | Available | Used |
 | --- | --- | --- | --- |
-| **Ergast** (`predict.load_actual_results`) | `driver_id` | usually within hours — the Dutch GP was mailed 4h00 after lights out | first, whenever it answers |
-| **F1 live timing** (`predict.load_live_classification`) | driver code (`VER`) | within the hour | only when Ergast is still empty |
+| **Ergast** (`predict.load_actual_results`) | `driver_id` | usually within hours — the Dutch GP was mailed 4h00 after lights out; the Italian GP was still unpublished six hours on | first, whenever it answers |
+| **OpenF1** (`openf1.classification`) | driver code (`VER`) | within the hour of the flag, and **from Actions** | whenever Ergast is still empty |
 
 Ergast is what the model has always trained against, and it is the reference.
-It is usually quick — `email_log` puts the Dutch Grand Prix's result mails four
-hours after lights out — but it is not guaranteed: the 2026 Italian Grand Prix
-was still unpublished five hours after the flag. Timing is what covers that
-gap, and it is the only source for the safety car and the starting grid.
+It is usually quick but it is not guaranteed, and the game cannot wait on it:
+OpenF1 mirrors the F1 timing feed over a plain REST API that GitHub Actions
+*can* reach (the timing host itself cannot be — §8.9), so the same evening's
+result is the norm rather than the exception.
 
-**It is not available everywhere.** GitHub Actions runners cannot reach
-`livetiming.formula1.com` — every timing endpoint fails there while Ergast
-answers normally — so in CI this second source silently never fires. See §8.9.
-
-Timing is not a provisional read. `load_live_classification` returns `{}` until
-`session_status` contains **`Finalised`** — the FIA's own marker that the
-stewards are done and the classification is final — so a race under
-investigation is simply not scored yet. The driver code is translated to a
-`driver_id` through the season's `drivers` table (written by `sync_schedule`
-from the same FastF1 roster); a code that is not in that table aborts the whole
-read rather than scoring a partial field, the same instinct as the prediction
-count check in step 6.
+`openf1.classification` is Ergast-shaped on purpose: OpenF1 gives a retired
+driver no position, Ergast ranks retirements after the finishers by laps
+completed, and the scoring engine was built on the latter — so the read
+reproduces that convention (finishers, then retirements by laps, then
+disqualifications, then non-starters), and a race scored from either source
+scores the same. The driver code is translated to a `driver_id` through the
+season's `drivers` table (written by `sync_schedule` from the same roster); a
+code that is not in that table aborts the whole read rather than scoring a
+partial field, the same instinct as the prediction count check in step 7.
 
 Because Ergast is preferred whenever present, the ten-day re-score window
-replays every timing-scored race against Ergast as soon as it publishes. The
-two sources therefore cannot end the season disagreeing.
+replays every OpenF1-scored race against Ergast as soon as it publishes. The
+two sources therefore cannot end the season disagreeing — and if a late
+steward's decision changes the order, the points move on that pass, silently:
+the result mail goes out once, on the first scoring (§8.8).
+
+The **safety car** (`openf1.safety_car`) and the model's **grid and
+practice** (§8.3) come from OpenF1 too; there is no Ergast for those.
+`predict.load_live_classification` — the direct FastF1 timing read this
+replaced — still exists for a laptop that wants it, but no job calls it.
 
 ### 8.5 The hand-run jobs: `set_dotd.py`, `settle_season.py`, `admin.py`
 
@@ -1066,7 +1100,23 @@ python jobs/settle_season.py 2026                # once, in December
 
 `set_dotd` validates the `driver_id` against the season roster, writes
 `results.dotd`, and immediately re-scores the race so the +5 lands right away.
-There is no official DotD API — this is the one manual step in the system.
+
+There is no official DotD API. What there is — and what `jobs/dotd.py` reads
+on every scoring pass until it finds one — is the article formula1.com
+publishes after each race, whose URL slug starts with `driver-of-the-day-
+<name>-…`, linked from the race's hub page (`/en/racing/<season>/<slug>`,
+kept for past races too). The hub is found by matching the slug's words to
+the race's name, circuit and country (`hub_candidates`), and confirmed by its
+`<title>` naming the Grand Prix — what tells `barcelona-catalunya` from
+`spain` on the year Spain has two rounds. The slug's name words are matched
+to the roster's surnames; anything but exactly one driver is `None` (a
+headline naming two — "Norris edges Alonso" — keeps the first). Verified
+2026-09-06 on the Italian, Dutch, Belgian, British and Barcelona hubs; the
+Monza article was up 35 minutes after the flag.
+
+Scraping, so it fails closed and `set_dotd` stays the hand for the day the
+markup changes. Nothing is ever guessed: a race with no readable article is a
+race whose DotD bonus nobody gets, until a human enters it.
 
 **`admin.py` — the operator console.** Never scheduled; it is what you run when
 you are running the platform rather than playing on it. Every command is a thin
@@ -1102,8 +1152,8 @@ its season line says).
 | Workflow | Schedule (UTC) | Job |
 | --- | --- | --- |
 | `sync-schedule.yml` | `0 5 * * 1` (Mon 05:00) | `sync_schedule.py` |
-| `lock-race.yml` | `15 * * * 5,6,0` (hourly Fri/Sat/Sun) | `lock_race.py` |
-| `score-race.yml` | `45 * * * *` (hourly, every day) | `score_race.py` |
+| `lock-race.yml` | `*/15 * * * 5,6,0` (every 15 min Fri/Sat/Sun) | `lock_race.py` |
+| `score-race.yml` | `*/15 * * * 0,1` + `45 * * * 2-6` (every 15 min Sun/Mon, hourly otherwise) | `score_race.py` — inputs `rounds`, `dry_run`, `verbose` |
 | `keepalive.yml` | `0 6 1 * *` (monthly) | commit + re-enable + DB ping |
 | `send-mail.yml` | none — manual only | `send_mail.py` (§8.8) |
 
@@ -1270,10 +1320,29 @@ just finished* — timing, positions, race control, the grid, tyre stints — is
 timing-only and will not work on Actions. Anything about a *published result*
 is Ergast and will.
 
-**Status: open.** The agreed direction is to split `lock_race.py` — the flip to
-`locked` is clock-and-database only and must stay on Actions, because closing
-predictions at lights out cannot depend on a machine being awake, while the
-model-entry refresh moves to a host that can reach timing. Not implemented.
+**Status: resolved on 2026-09-06 — by a second host, not a second machine.**
+`api.openf1.org` mirrors the same timing feed over a plain REST API, and it
+answers Actions runners (200, verified from a runner the same evening the
+timing host answered 403). `src/openf1.py` reads it, and every timing-only
+need now has a path that works on Actions: the classification and the safety
+car (`jobs/model_bridge.py`), the model's qualifying and practice
+(`predict.load_qualifying` / `load_practice`, FastF1 first, OpenF1 when that
+comes back empty), the roster's team colours (`sync_schedule`). Nothing
+depends on a laptop being awake, which the earlier plan — a split
+`lock_race.py` with the refresh on the operator's Mac — would have.
+
+The rule for new code stands, with one word changed: before a job depends on
+a FastF1 field, ask which family it comes from — and if it is timing, read it
+through `openf1.py`. The `probe-network` experiment that established all
+this (curl to the four hosts from a runner) lived on a throwaway branch and
+is gone; re-running it is a five-line workflow.
+
+One oddity worth knowing: FastF1's Ergast-backed qualifying read
+(`Session.results` for a `Q` session with timing down) came back **empty on
+Actions** for the 2026 Italian Grand Prix while Jolpica plainly served the
+same qualifying from the same runner — not rate-limited, not a 4xx, an empty
+table. It works from a laptop. Not diagnosed; irrelevant now that OpenF1
+answers, noted in case it ever matters again.
 
 ## 9. Part VI — The web frontend
 
@@ -2510,6 +2579,30 @@ Either the season is over, or `races` has no `scheduled` row with
 `race_at > now` for `NEXT_PUBLIC_SEASON`. → Run `sync-schedule`; check
 `NEXT_PUBLIC_SEASON` matches the seeded season.
 
+**The race is over, hours have passed, `score-race` still says "no official
+classification yet".**
+Ergast hasn't published and OpenF1 answered nothing. The log says which:
+`openf1: …` lines are the client refusing (network, 5xx after retries, a
+4xx); "OpenF1 has unknown driver code(s)" means the season roster in
+`drivers` is missing someone — run `sync-schedule`. Silence from both means
+OpenF1 has no `session_result` yet (the free tier serves a session ~30 min
+after it ends). → Wait a pass; if OpenF1 is down, Ergast will do in a few
+hours, as before.
+
+**`results.dotd` stays null; the log says `no unique roster match` or nothing
+about dotd.**
+formula1.com's article slug named nobody the roster recognises — a nickname,
+a headline about the vote rather than the driver — or the race hub could not
+be matched (the log prints the slug it read; no line at all means no hub
+matched or no article yet). → `python jobs/set_dotd.py <season> <round>
+<driver_id>`; the +5 lands immediately. Then look at `jobs/dotd.py::
+driver_from_slug` if the pattern will recur.
+
+**`results.safety_car` is null on a scored race.**
+Race control had published nothing when the race was scored (OpenF1 lag or
+outage). The ten-day re-score window asks again on every pass; older than
+that, `python jobs/score_race.py --rounds <n>` does.
+
 **The model has no entry for this weekend.**
 `lock-race` runs hourly Fri–Sun and only refreshes once `now > quali_at +
 1h30`. → Check the Actions log. `model unavailable (…)` means `predict.py`
@@ -2650,12 +2743,31 @@ page renders empty locally; the harness is not optional.
 
 | # | Issue | Impact | Fix |
 | --- | --- | --- | --- |
-| 1 | A race locked with **no** model entry can never be scored (§8.3) | `score_race` refuses it forever; `lock-race` only scans `scheduled` races, so it never retries | Let `lock_race` backfill entries for `locked`-but-unscored races. Until then, recovery is manual (§8.3) |
 | 2 | README says Optuna runs 50 trials; `train.py` uses 60 | Documentation only | Align the README |
-| 3 | **The model has never had the grid.** Actions cannot reach the F1 timing API (§8.9), so `model_entries.pre_quali` is `true` for every race of 2026 | The opponent every player is scored against locks its entry without qualifying — the calibrated matrix falls back on an uninformed grid prior | Split `lock_race.py`: keep the flip to `locked` on Actions, move the model-entry refresh to a host that can reach timing (§8.9) |
-| 4 | **The safety-car side bet has never been settled.** Same cause: race-control messages are timing-only, so `results.safety_car` is `null` on all twelve scored races of 2026 | Every player's SC bet scores zero, silently, whatever happened in the race | Same fix as #3; `set_dotd`-style manual entry would also work as a stopgap |
+| 5 | The model's history (`data/processed/*.csv`, form and standings features) is refreshed by hand — `collect.py` + `features.py` on a laptop, committed | Between refreshes the model's "recent form" and championship standings are stale; they were frozen at round 7 from June to September 2026 | Refresh after each race until collection has an OpenF1 path of its own (`collect.py` needs timing for weather and practice laps) |
+| 6 | `model_entries` of rounds 1–13 of 2026 were locked `pre_quali` (§13.1.1 #3) and stay so | Those duels were played against an opponent without a grid; entries are frozen at lock and are not rewritten after the fact | None — by design. From round 14 the model has qualifying |
 
 ### 13.1.1 Fixed
+
+- **The timing feed, from Actions** (fixed 2026-09-06, `feat/openf1-sources`).
+  Three open issues with one cause — `livetiming.formula1.com` answers 403 to
+  GitHub Actions and FastF1 carries on with empty tables (§8.9):
+  - *#1 — a race locked with no model entry could never be scored*:
+    `lock_race.py` now retries `locked` races without an entry on every run
+    (§8.3).
+  - *#3 — the model had never had the grid*: `predict.load_qualifying` /
+    `load_practice` read OpenF1 when FastF1 comes back empty; the first
+    entry with qualifying is round 14. `pre_quali` was `true` on all 13
+    rounds before it.
+  - *#4 — the safety-car bet had never been settled*: `results.safety_car`
+    now comes from OpenF1's race control. Settled retroactively for rounds
+    1–13 with `score_race.py --rounds 1-13` the same evening — which moved
+    the Dutch Grand Prix's totals (three players, +8 each where the call was
+    right) and the model's season line.
+  Also in the same change: same-evening scoring from OpenF1's classification
+  (Monza was scored six hours after the flag, from the branch, while Ergast
+  still had nothing), the Driver of the Day read from formula1.com (§8.5),
+  and the crons at 15 minutes on race days.
 
 - **The model's picks were public while you were still picking** (fixed
   2026-08-16, `fix/model-picks-secret-until-lock`, migration 0009). `predictions`
@@ -2766,6 +2878,7 @@ PR — a stale almanac is worse than no almanac.
 | --- | --- |
 | Game rules, points, bonuses, tiers | `GAME_DESIGN.md` **first**, then §6 here |
 | `jobs/scoring.py`, `model_bridge.py`, `grid_prior.py`, `safety_car.py` | §6 (+ re-run `backtest.py` and record the outcome) |
+| `src/openf1.py`, `jobs/dotd.py` — a data source | §2.2, §8.4.1 / §8.5, and §8.9 if it is about what Actions can reach |
 | Features, training, splits, σ | §4 |
 | `src/app.py` routes or caching | §5 |
 | `supabase/schema.sql` or a new migration | §7 (including the migration table) and `supabase/README.md` |
@@ -2860,8 +2973,9 @@ python src/app.py                      # http://127.0.0.1:5050
 # ── Game jobs (need SUPABASE_URL + SUPABASE_SERVICE_KEY) ───────
 python jobs/sync_schedule.py [season]
 python jobs/lock_race.py
-python jobs/score_race.py
-python jobs/set_dotd.py <season> <round> <driver_id>
+python jobs/score_race.py                            # the scheduled pass
+python jobs/score_race.py --rounds 1-13 [--dry-run]  # re-score any race; dry-run writes nothing
+python jobs/set_dotd.py <season> <round> <driver_id> # only when dotd.py found nothing
 python jobs/settle_season.py <season>
 python jobs/backtest.py [season] [--rounds 1-13]     # no DB needed
 

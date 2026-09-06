@@ -189,9 +189,9 @@ def safety_car(session_key: int) -> bool | None:
         return None
     for m in msgs:
         text = (m.get("message") or "").upper()
-        cat = (m.get("category") or "").replace(" ", "").upper()
-        if "DEPLOYED" in text and (cat == "SAFETYCAR" or "SAFETY CAR" in text
-                                   or "VSC" in text):
+        if "DEPLOYED" not in text or "MEDICAL" in text:
+            continue  # the medical car is not a safety car
+        if "SAFETY CAR" in text or "VSC" in text or "VIRTUAL" in text:
             return True
     return False
 

@@ -20,6 +20,7 @@ import requests
 import db
 import model_bridge  # noqa: F401  (configures the FastF1 cache via src/predict)
 import fastf1
+import openf1  # src/openf1.py, on sys.path thanks to model_bridge
 
 
 def _utc(v):
@@ -84,10 +85,34 @@ def sync_roster(season: int) -> None:
                 "team_color": f"#{color}" if color else None,
                 "active": True,
             })
+        _fill_team_colours(season, race, rows)
         db.upsert("drivers", rows, on_conflict="season,driver_id")
         print(f"roster: {len(rows)} drivers from round {race['round']}")
         return
     print("roster: no completed race with results yet")
+
+
+def _fill_team_colours(season: int, race: dict, rows: list[dict]) -> None:
+    """Team colours are timing-only, so on Actions FastF1 leaves every one of
+    them null (all 23 of 2026 were, until 2026-09). OpenF1 carries the same
+    colours and is reachable there; read them by driver code."""
+    if all(r["team_color"] for r in rows) or not race.get("race_at"):
+        return
+    try:
+        session = openf1.race_session(season, datetime.fromisoformat(race["race_at"]))
+        if session is None:
+            return
+        by_code = {d["code"]: d["colour"] for d in openf1.drivers(session["session_key"]).values()}
+    except openf1.OpenF1Error as e:
+        print(f"roster: OpenF1 colours unavailable ({e})")
+        return
+    filled = 0
+    for r in rows:
+        if not r["team_color"] and by_code.get(r["code"]):
+            r["team_color"] = by_code[r["code"]]
+            filled += 1
+    if filled:
+        print(f"roster: {filled} team colour(s) from OpenF1")
 
 
 def _standings(season: int, kind: str) -> list[dict]:
