@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.join(ROOT, "src"))
 
 import predict as model  # noqa: E402  (src/predict.py)
 
+import db  # noqa: E402
 import grid_prior  # noqa: E402
 import safety_car  # noqa: E402
 
@@ -153,8 +154,48 @@ def model_entry(season: int, rnd: int) -> dict:
 
 
 def actual_classification(season: int, rnd: int) -> dict[str, int]:
-    """Official race classification, {} if not available yet."""
-    return model.load_actual_results(season, rnd)
+    """Official race classification as {driver_id: position}, {} if not in yet.
+
+    Two sources, in this order, because they disagree only about *when*:
+
+    1. **Ergast** — keyed by `driver_id` already, and the reference the model
+       has always trained against. It publishes days after the race.
+    2. **F1 live timing** — the same final classification, within the hour, but
+       keyed by driver code because the `driver_id` slug is an Ergast notion.
+       Only read once the FIA marks the session `Finalised`, so this is the
+       official result and not a provisional one.
+
+    Waiting for Ergast alone left a Grand Prix unscored — and its players
+    unmailed — for over a week, which is most of the fortnight between races.
+    Ergast still wins whenever it is there: the three-week re-score window in
+    `jobs/score_race.py` replays a race scored from timing once Ergast lands,
+    so the two sources can never drift apart.
+    """
+    official = model.load_actual_results(season, rnd)
+    if official:
+        return official
+
+    by_code = model.load_live_classification(season, rnd)
+    if not by_code:
+        return {}
+
+    # `drivers` is written by jobs/sync_schedule.py from the same FastF1 roster,
+    # so it is the season's own code → driver_id table rather than a mapping
+    # maintained by hand here.
+    driver_id_for = {
+        d["code"]: d["driver_id"]
+        for d in db.select("drivers", {"season": f"eq.{season}"})
+    }
+    # A code that is not in the roster means the two sources disagree about who
+    # is racing, and scoring a partial classification is worse than not scoring
+    # at all — the same instinct as the prediction count check in score_race.
+    unknown = sorted(set(by_code) - set(driver_id_for))
+    if unknown:
+        print(f"round {rnd}: timing has unknown driver code(s) {unknown} — "
+              f"not scoring from timing, waiting for Ergast")
+        return {}
+
+    return {driver_id_for[c]: p for c, p in by_code.items()}
 
 
 def safety_car_occurred(season: int, rnd: int) -> bool | None:

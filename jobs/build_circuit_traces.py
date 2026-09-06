@@ -34,6 +34,11 @@ OUT = ROOT / "web" / "lib" / "circuits.ts"
 # exact-location fallback to last season silently loses a circuit. One entry
 # per rename; the key is this season's label.
 PREV_ALIAS = {
+    # Not a rename: FastF1's 2026 schedule files the Bahrain Grand Prix — round
+    # 16, country "Bahrain", run at Sakhir — under location "Kuala Lumpur".
+    # Without this line the round has no trace at all, and the hero goes blank
+    # for a circuit that has been on the calendar for twenty years.
+    "Kuala Lumpur": "Sakhir",
     "Yas Marina": "Yas Island",
     "Monte Carlo": "Monaco",
     "Montreal": "Montréal",
@@ -138,7 +143,10 @@ def trace(season: int, rnd: int):
     names, and it will happily answer "Madrid" with the Miami Grand Prix —
     which would put the wrong circuit in the hero and look entirely
     plausible."""
-    for kind in ("R", "Q"):
+    # Best lap first: the race and qualifying are driven on the full circuit at
+    # speed. Practice is the last resort and exists for one case — a venue
+    # nobody has ever raced, where Friday is the only telemetry in existence.
+    for kind in ("R", "Q", "FP3", "FP2", "FP1"):
         try:
             s = fastf1.get_session(season, rnd, kind)
             s.load(telemetry=True, laps=True, weather=False, messages=False)
@@ -235,14 +243,19 @@ def main() -> None:
     for _, ev in schedule.iterrows():
         loc = str(ev["Location"])
         rnd = int(ev["RoundNumber"])
-        # A race that has not happened has no telemetry, and asking for it
+        # An event nobody has driven yet has no telemetry, and asking for it
         # means a network round-trip that times out. Twenty of those is the
         # difference between a job that takes a minute and one that takes ten.
-        raced = pd.Timestamp(ev["EventDate"]) < now
+        #
+        # The gate is the *first session*, not the race. A brand-new venue —
+        # Madrid in 2026 — has no past race to fall back on, so waiting for
+        # Sunday leaves the hero blank across the very weekend the circuit is
+        # new. First practice is enough to draw a lap, and it runs on Friday.
+        started = pd.Timestamp(ev.get("Session1DateUtc") or ev["EventDate"]) < now
         # This season first — a circuit is re-profiled when it is resurfaced —
         # then last season, matched by exact location, for anything not yet
         # raced this year.
-        t = trace(season, rnd) if raced else None
+        t = trace(season, rnd) if started else None
         prev_loc = loc if loc in prev_round else PREV_ALIAS.get(loc)
         if t is None and prev_loc in prev_round:
             t = trace(season - 1, prev_round[prev_loc])

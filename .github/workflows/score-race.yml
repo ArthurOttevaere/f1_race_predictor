@@ -2,9 +2,13 @@ name: score-race
 
 on:
   schedule:
-    # Hourly Sun-Tue (UTC): score as soon as the official classification lands,
-    # then re-score recent races so a late Driver-of-the-Day entry is applied.
-    - cron: "45 * * * 0,1,2"
+    # Hourly, every day (UTC). Sun-Tue was enough when the only source was
+    # Ergast and it happened to publish early in the week; it published on a
+    # Wednesday twice running instead, and the job was asleep from Tuesday
+    # night to the next Sunday — which is how a Grand Prix stayed unscored for
+    # nine days. Scoring now lands the same evening from F1 timing, and this
+    # window is what guarantees the Ergast re-score is never slept through.
+    - cron: "45 * * * *"
   workflow_dispatch:
 
 concurrency:

@@ -672,6 +672,9 @@ FEATURE_LABELS = {
 def load_actual_results(year, round_number):
     """Résultats réels de la course (DriverId → position d'arrivée).
 
+    Source Ergast, qui publie plusieurs jours après la course. Pour classer une
+    course le dimanche soir, voir `load_live_classification` ci-dessous.
+
     Retourne {} si la course n'a pas encore eu lieu ou est indisponible.
     """
     try:
@@ -687,6 +690,56 @@ def load_actual_results(year, round_number):
             if did and pos == pos:  # not NaN
                 try:
                     out[str(did)] = int(pos)
+                except (TypeError, ValueError):
+                    continue
+        return out
+    except Exception:
+        return {}
+
+
+def load_live_classification(year, round_number):
+    """Classement final depuis le chronométrage officiel F1 (code pilote → position).
+
+    `load_actual_results` ne connaît qu'Ergast, qui publie une course avec
+    plusieurs jours de retard — le jeu ne peut pas attendre autant pour classer
+    un Grand Prix. Le flux de chronométrage F1, lui, porte le classement dans
+    l'heure qui suit l'arrivée.
+
+    Ce n'est pas pour autant du provisoire : on ne lit le classement que si le
+    statut de session est passé à **Finalised**, l'accusé de réception de la FIA
+    disant que les commissaires ont fini et que le classement est officiel. Tant
+    qu'il n'y est pas (course en cours, enquête ouverte), on retourne {} et
+    l'appelant réessaiera.
+
+    Les positions sont clés par code pilote ('VER') et non par DriverId : le
+    slug DriverId vient d'Ergast et arrive donc vide ici. La traduction en
+    DriverId appartient à l'appelant, qui a le tableau des pilotes de la saison
+    (voir jobs/model_bridge.actual_classification).
+
+    Retourne {} si la course n'est pas courue, pas finalisée, ou indisponible.
+    """
+    try:
+        session = fastf1.get_session(year, round_number, 'R')
+        # laps=True : sans les tours, FastF1 n'a aucune autre source que Ergast
+        # pour remplir Position, et rend une grille de NaN.
+        session.load(laps=True, telemetry=False, weather=False, messages=False)
+
+        status = session.session_status
+        if status is None or status.empty:
+            return {}
+        if 'Finalised' not in set(str(s) for s in status.get('Status', [])):
+            return {}
+
+        res = session.results
+        if res is None or res.empty:
+            return {}
+        out = {}
+        for _, r in res.iterrows():
+            code = r.get('Abbreviation')
+            pos = r.get('Position')
+            if code and pos == pos:  # not NaN
+                try:
+                    out[str(code)] = int(pos)
                 except (TypeError, ValueError):
                     continue
         return out
