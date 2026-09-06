@@ -165,11 +165,15 @@ def actual_classification(season: int, rnd: int) -> dict[str, int]:
        Only read once the FIA marks the session `Finalised`, so this is the
        official result and not a provisional one.
 
-    Waiting for Ergast alone left a Grand Prix unscored — and its players
-    unmailed — for over a week, which is most of the fortnight between races.
-    Ergast still wins whenever it is there: the three-week re-score window in
-    `jobs/score_race.py` replays a race scored from timing once Ergast lands,
-    so the two sources can never drift apart.
+    Ergast is usually quick — the 2026 Dutch Grand Prix was scored and mailed
+    four hours after lights out — but it is not guaranteed, and the Italian
+    Grand Prix was still unpublished five hours after the flag. Timing covers
+    that gap. Ergast still wins whenever it is there: the ten-day re-score
+    window in `jobs/score_race.py` replays a race scored from timing once
+    Ergast lands, so the two sources can never drift apart.
+
+    Note that GitHub Actions runners cannot reach the F1 timing API at all, so
+    on CI this falls through to {} and scoring waits for Ergast (ALMANAC §8.9).
     """
     official = model.load_actual_results(season, rnd)
     if official:

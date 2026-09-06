@@ -173,7 +173,7 @@ Sun race_at+2h  score-race       FastF1 classification available?
 Mon (manual)    set_dotd.py      enter the official Driver of the Day
                                  → immediate re-score (+5 where correct)
    ↓
-hourly passes   score-race       re-scores races scored in the last 21 days,
+hourly passes   score-race       re-scores races scored in the last 10 days,
                                  so a late DotD is always picked up and the
                                  Ergast classification supersedes the timing
                                  one when it finally publishes
@@ -1007,8 +1007,8 @@ correct stand-in for the starting grid (before penalties).
 ### 8.4 `score_race.py` — hourly, every day
 
 Processes every `locked` race, plus every `scored` race whose `race_at` is
-within the last 21 days (the re-score window that catches a late DotD and the
-late Ergast classification, §8.4.1).
+within the last 10 days (the re-score window that catches a late DotD, and
+replays a timing-scored race against Ergast when it publishes, §8.4.1).
 
 1. Refuse if `now < race_at + 2h` (race can't plausibly be over).
 2. Fetch the official classification; if empty, wait for the next pass.
@@ -1031,15 +1031,18 @@ knows about both.
 
 | Source | Keyed by | Available | Used |
 | --- | --- | --- | --- |
-| **Ergast** (`predict.load_actual_results`) | `driver_id` | days after the race — observed at 5–10 | first, whenever it answers |
+| **Ergast** (`predict.load_actual_results`) | `driver_id` | usually within hours — the Dutch GP was mailed 4h00 after lights out | first, whenever it answers |
 | **F1 live timing** (`predict.load_live_classification`) | driver code (`VER`) | within the hour | only when Ergast is still empty |
 
-Ergast alone is what the model has always trained against, and it is the
-reference. It is also far too slow to run a game on: rounds 11 and 12 of 2026
-were both classified on the **Wednesday nine days after the race**, so players
-spent most of the fortnight between Grands Prix looking at a home page that
-still showed the race as unscored, and their result email arrived a week and a
-half late. That is the bug this two-source read fixes.
+Ergast is what the model has always trained against, and it is the reference.
+It is usually quick — `email_log` puts the Dutch Grand Prix's result mails four
+hours after lights out — but it is not guaranteed: the 2026 Italian Grand Prix
+was still unpublished five hours after the flag. Timing is what covers that
+gap, and it is the only source for the safety car and the starting grid.
+
+**It is not available everywhere.** GitHub Actions runners cannot reach
+`livetiming.formula1.com` — every timing endpoint fails there while Ergast
+answers normally — so in CI this second source silently never fires. See §8.9.
 
 Timing is not a provisional read. `load_live_classification` returns `{}` until
 `session_status` contains **`Finalised`** — the FIA's own marker that the
@@ -1050,7 +1053,7 @@ from the same FastF1 roster); a code that is not in that table aborts the whole
 read rather than scoring a partial field, the same instinct as the prediction
 count check in step 6.
 
-Because Ergast is preferred whenever present, the 21-day re-score window
+Because Ergast is preferred whenever present, the ten-day re-score window
 replays every timing-scored race against Ergast as soon as it publishes. The
 two sources therefore cannot end the season disagreeing.
 
@@ -1167,7 +1170,7 @@ failed to save.
 
 | Property | How |
 | --- | --- |
-| Idempotent | `email_log(race_id, user_id, kind)` written after each success; `email_recipients()` excludes anyone already logged. `score-race` re-runs hourly for three weeks — without the log that is three weeks of hourly mail to every player. |
+| Idempotent | `email_log(race_id, user_id, kind)` written after each success; `email_recipients()` excludes anyone already logged. `score-race` re-runs hourly for ten days — without the log that is ten days of hourly mail to every player. |
 | Retryable | A failed send is **never** logged, so the next hourly run picks it up. Nothing is queued and nothing is retried in-process. |
 | Silent when unconfigured | No `RESEND_API_KEY` → `send()` prints and returns `False`. The jobs behave exactly as before. |
 | Non-fatal | A bad address returns `False` rather than raising. One bounce must not take down a scoring run. |
@@ -2441,7 +2444,7 @@ index; that file is the manual.
 | Enter Driver of the Day | `python jobs/set_dotd.py <season> <round> <driver_id>` (Monday) |
 | Settle the season | `python jobs/settle_season.py <season>` (December, once) |
 | Force a lock / score now | Actions tab → workflow → **Run workflow** |
-| Re-score a race | It re-scores automatically for 21 days; otherwise set `races.status='locked'` in SQL and run `score-race` |
+| Re-score a race | It re-scores automatically for 10 days; otherwise set `races.status='locked'` in SQL and run `score-race` |
 | Refresh the model after new races | `python src/collect.py <year> --force` (+ `--practice`), `python src/features.py`, then optionally `python src/train.py` |
 | Validate a rules change | `python jobs/backtest.py 2026 --rounds 1-13` — `mirror` must draw every race |
 | Inspect players | `python jobs/admin.py players`, or the SQL editor query in §7.6 |

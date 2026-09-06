@@ -6,8 +6,11 @@
 // viewBox; `start` is the start/finish line and the direction of travel
 // through it.
 //
-// A circuit that has never been raced is simply absent, and the hero renders
-// without a trace. Re-run the job when the calendar gains a venue.
+// A circuit nobody has driven yet is absent unless jobs/schematic_traces.json
+// carries a traced diagram for it, in which case the entry is marked
+// `source: "schematic"` and carries the credit its licence requires. Telemetry
+// always wins and replaces it after that venue's first session.
+// Re-run the job when the calendar gains a venue.
 
 export interface CircuitTrace {
   /** Matches `races.circuit`, lowercased and hyphenated. */
@@ -22,6 +25,12 @@ export interface CircuitTrace {
   corners: number;
   /** The season the geometry was taken from. */
   season: number;
+  /** Where the shape came from. `schematic` is a stand-in for a venue that has
+   *  never been driven, and is replaced by telemetry after its first session. */
+  source: "telemetry" | "schematic";
+  /** Attribution required by a schematic's licence. Absent for telemetry. */
+  credit?: string;
+  creditUrl?: string;
 }
 
 export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
@@ -35,6 +44,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 89.5, y: 382.6, angle: 37.7 },
     corners: 20,
     season: 2025,
+    source: "telemetry",
   },
   "baku": {
     slug: "baku",
@@ -46,6 +56,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 849.6, y: 215.7, angle: -19.7 },
     corners: 20,
     season: 2025,
+    source: "telemetry",
   },
   "barcelona": {
     slug: "barcelona",
@@ -57,6 +68,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 729.6, y: 305.9, angle: 179.4 },
     corners: 14,
     season: 2026,
+    source: "telemetry",
   },
   "budapest": {
     slug: "budapest",
@@ -68,6 +80,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 624.7, y: 964.1, angle: 178.9 },
     corners: 16,
     season: 2026,
+    source: "telemetry",
   },
   "kuala-lumpur": {
     slug: "kuala-lumpur",
@@ -79,6 +92,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 592.8, y: 638.9, angle: -179.5 },
     corners: 15,
     season: 2025,
+    source: "telemetry",
   },
   "las-vegas": {
     slug: "las-vegas",
@@ -90,6 +104,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 923.5, y: 116.4, angle: -139.9 },
     corners: 17,
     season: 2025,
+    source: "telemetry",
   },
   "lusail": {
     slug: "lusail",
@@ -101,6 +116,21 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 654.0, y: 707.8, angle: -180.0 },
     corners: 16,
     season: 2025,
+    source: "telemetry",
+  },
+  "madrid": {
+    slug: "madrid",
+    location: "Madrid",
+    path:
+      "M108 588C107 584 107 579 106 574C105 570 104 565 103 560C103 556 102 551 101 546C100 542 100 537 99 533C98 528 97 523 97 519C96 514 95 509 94 505C94 500 93 495 92 491C91 486 90 482 90 477C89 472 88 468 87 463C87 458 86 454 85 449C84 444 84 440 83 435C82 431 81 426 80 421C80 417 79 412 78 407C77 403 77 398 76 393C75 389 74 384 74 380C73 375 72 370 71 366C71 361 70 356 69 352C68 347 67 342 67 338C66 333 65 329 64 324C64 319 63 314 62 310C61 306 60 300 57 298C54 295 47 298 43 297C39 295 34 293 32 290C29 286 30 281 29 276C28 271 27 267 27 262C26 257 26 253 26 248C27 243 27 239 29 234C30 230 32 226 35 221C37 217 40 213 43 210C46 207 50 204 53 201C57 198 61 195 65 193C69 190 73 188 77 185C81 183 85 180 89 178C93 175 97 173 101 170C105 168 109 165 113 163C117 160 121 158 125 155C129 153 133 151 137 148C141 146 145 143 149 141C153 138 157 136 161 133C165 131 169 128 173 126C177 123 181 121 185 118C189 116 193 113 197 111C201 108 205 106 209 103C213 101 217 98 221 96C225 94 229 91 233 89C237 87 241 85 245 83C250 81 254 79 258 77C263 75 267 73 271 72C276 70 280 68 285 67C289 65 294 64 298 62C303 61 307 60 312 59C316 58 321 57 325 56C330 55 335 55 339 54C344 54 349 54 354 54C358 54 363 54 368 54C372 54 377 54 382 54C386 55 391 56 395 58C400 59 405 60 409 61C414 63 418 64 422 66C427 67 431 69 435 71C440 73 444 77 447 78C451 79 454 78 458 77C462 76 467 73 471 74C475 74 479 79 483 80C487 81 492 79 497 77C501 76 506 75 510 73C515 72 519 71 524 69C528 67 532 65 536 63C540 60 544 57 548 55C552 52 556 51 561 49C565 48 570 46 574 45C579 44 583 43 588 42C592 41 597 41 602 39C606 38 611 36 615 34C619 32 623 28 627 27C631 27 636 28 640 30C643 32 645 38 648 41C652 44 656 46 661 47C665 47 670 45 674 44C679 42 682 39 686 37C691 34 695 32 699 30C703 29 708 28 713 27C717 26 722 27 727 27C731 26 736 26 741 26C746 26 750 26 755 26C760 26 764 26 769 26C774 26 779 25 783 26C788 28 792 30 796 33C799 35 802 39 805 43C808 46 811 50 814 54C817 58 820 62 823 64C827 67 831 70 836 71C840 72 845 71 850 70C854 69 859 67 863 66C867 64 872 62 876 60C880 58 885 56 889 55C893 53 898 51 902 50C907 49 912 48 916 48C921 47 926 48 930 49C935 50 939 51 943 53C947 55 951 59 955 62C958 65 961 69 964 72C966 76 969 80 971 85C973 89 973 94 974 98C974 103 974 108 974 112C973 117 973 122 971 126C970 130 967 135 965 139C962 143 959 146 956 149C952 153 949 156 945 158C941 161 937 163 933 165C928 167 924 169 919 170C915 171 910 171 905 171C901 171 896 171 891 170C887 169 882 167 878 165C874 163 869 161 865 159C861 157 857 155 853 153C849 150 845 148 841 145C837 143 833 140 829 137C826 134 822 131 818 128C815 125 811 122 807 119C804 117 800 114 796 111C793 108 789 105 785 102C782 99 778 96 774 94C770 91 767 88 763 85C759 82 755 80 751 77C747 75 743 72 739 70C735 68 730 65 726 66C722 67 719 72 716 76C713 79 710 83 707 87C705 90 702 94 699 98C696 102 694 106 691 110C688 113 686 117 682 121C679 124 676 127 672 130C668 133 664 136 660 138C656 139 651 140 646 141C642 142 637 141 632 141C628 141 623 141 618 141C614 141 609 141 604 140C599 140 595 140 590 140C585 141 581 141 576 143C572 145 568 147 564 150C560 152 556 155 553 158C549 161 546 165 544 169C541 173 538 177 537 181C535 186 534 190 534 195C533 200 533 204 533 209C533 214 533 218 533 223C533 228 533 233 533 237C533 242 533 247 533 251C534 256 535 261 537 265C538 269 541 273 543 278C545 282 549 287 548 291C547 294 541 297 538 300C534 303 530 306 526 308C522 311 518 314 514 316C510 319 506 321 502 324C498 326 494 328 490 331C486 333 482 335 478 338C474 340 470 342 466 344C461 347 457 348 453 351C450 354 448 359 446 363C445 367 445 372 445 377C445 382 445 386 446 391C446 396 448 400 448 405C449 409 449 414 449 419C449 424 449 428 448 433C447 437 446 442 444 446C442 451 440 455 437 458C434 462 431 466 427 468C423 471 419 473 414 475C410 476 405 477 401 478C396 479 391 479 387 480C382 481 377 481 373 482C368 483 364 484 359 484C354 485 350 486 345 487C340 487 336 488 331 489C326 490 322 491 317 491C313 492 308 493 303 494C299 495 294 496 289 497C285 497 280 497 276 498C271 499 264 500 263 503C262 506 267 511 269 515C271 519 273 524 274 528C275 533 275 537 276 542C276 547 277 551 278 556C278 561 279 566 278 570C278 574 276 579 273 582C270 585 265 585 260 587C256 588 251 590 247 591C242 592 238 594 233 595C228 596 224 597 219 598C215 598 210 599 205 600C201 601 196 602 191 602C187 603 182 604 178 605C173 606 168 607 164 607C159 608 154 609 150 610C145 611 141 612 136 613C131 613 126 613 122 611C118 609 114 605 112 602C110 598 109 593 108 588Z",
+    width: 1000.0,
+    height: 638.8,
+    start: { x: 108.1, y: 588.2, angle: -99.4 },
+    corners: 22,
+    season: 2026,
+    source: "schematic",
+    credit: "Madring (2026).svg by GabrielStella, CC BY-SA 3.0, via Wikimedia Commons",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Madring_(2026).svg",
   },
   "marina-bay": {
     slug: "marina-bay",
@@ -112,6 +142,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 903.6, y: 476.5, angle: -74.3 },
     corners: 19,
     season: 2025,
+    source: "telemetry",
   },
   "melbourne": {
     slug: "melbourne",
@@ -123,6 +154,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 555.8, y: 493.3, angle: 179.6 },
     corners: 14,
     season: 2026,
+    source: "telemetry",
   },
   "mexico-city": {
     slug: "mexico-city",
@@ -134,6 +166,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 116.2, y: 378.8, angle: -27.9 },
     corners: 17,
     season: 2025,
+    source: "telemetry",
   },
   "miami-gardens": {
     slug: "miami-gardens",
@@ -145,6 +178,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 417.5, y: 78.7, angle: 30.3 },
     corners: 19,
     season: 2026,
+    source: "telemetry",
   },
   "monte-carlo": {
     slug: "monte-carlo",
@@ -156,6 +190,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 156.9, y: 118.6, angle: -48.2 },
     corners: 19,
     season: 2026,
+    source: "telemetry",
   },
   "montreal": {
     slug: "montreal",
@@ -167,6 +202,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 825.5, y: 224.9, angle: 21.6 },
     corners: 14,
     season: 2026,
+    source: "telemetry",
   },
   "monza": {
     slug: "monza",
@@ -178,6 +214,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 767.0, y: 498.5, angle: 180.0 },
     corners: 11,
     season: 2026,
+    source: "telemetry",
   },
   "sao-paulo": {
     slug: "sao-paulo",
@@ -189,6 +226,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 362.5, y: 29.1, angle: 177.7 },
     corners: 15,
     season: 2025,
+    source: "telemetry",
   },
   "shanghai": {
     slug: "shanghai",
@@ -200,6 +238,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 344.0, y: 414.5, angle: -69.4 },
     corners: 16,
     season: 2026,
+    source: "telemetry",
   },
   "silverstone": {
     slug: "silverstone",
@@ -211,6 +250,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 690.1, y: 542.1, angle: -144.1 },
     corners: 18,
     season: 2026,
+    source: "telemetry",
   },
   "spa-francorchamps": {
     slug: "spa-francorchamps",
@@ -222,6 +262,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 176.7, y: 447.2, angle: 145.5 },
     corners: 19,
     season: 2026,
+    source: "telemetry",
   },
   "spielberg": {
     slug: "spielberg",
@@ -233,6 +274,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 621.7, y: 568.7, angle: 163.9 },
     corners: 10,
     season: 2026,
+    source: "telemetry",
   },
   "suzuka": {
     slug: "suzuka",
@@ -244,6 +286,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 627.1, y: 26.4, angle: 0.3 },
     corners: 18,
     season: 2026,
+    source: "telemetry",
   },
   "yas-marina": {
     slug: "yas-marina",
@@ -255,6 +298,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 406.1, y: 173.2, angle: 73.1 },
     corners: 16,
     season: 2025,
+    source: "telemetry",
   },
   "zandvoort": {
     slug: "zandvoort",
@@ -266,6 +310,7 @@ export const CIRCUIT_TRACES: Record<string, CircuitTrace> = {
     start: { x: 127.1, y: 432.8, angle: -68.8 },
     corners: 14,
     season: 2026,
+    source: "telemetry",
   },
 };
 
