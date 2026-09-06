@@ -716,6 +716,10 @@ def load_live_classification(year, round_number):
     DriverId appartient à l'appelant, qui a le tableau des pilotes de la saison
     (voir jobs/model_bridge.actual_classification).
 
+    Chaque refus dit pourquoi. Une fonction qui rend {} en silence a déjà coûté
+    une course : le job annonçait « no official classification yet » sans qu'on
+    puisse distinguer « la FIA n'a pas fini » d'une exception réseau avalée.
+
     Retourne {} si la course n'est pas courue, pas finalisée, ou indisponible.
     """
     try:
@@ -723,28 +727,46 @@ def load_live_classification(year, round_number):
         # laps=True : sans les tours, FastF1 n'a aucune autre source que Ergast
         # pour remplir Position, et rend une grille de NaN.
         session.load(laps=True, telemetry=False, weather=False, messages=False)
-
-        status = session.session_status
-        if status is None or status.empty:
-            return {}
-        if 'Finalised' not in set(str(s) for s in status.get('Status', [])):
-            return {}
-
-        res = session.results
-        if res is None or res.empty:
-            return {}
-        out = {}
-        for _, r in res.iterrows():
-            code = r.get('Abbreviation')
-            pos = r.get('Position')
-            if code and pos == pos:  # not NaN
-                try:
-                    out[str(code)] = int(pos)
-                except (TypeError, ValueError):
-                    continue
-        return out
-    except Exception:
+    except Exception as exc:
+        print(f"  timing {year} r{round_number}: session.load failed — "
+              f"{type(exc).__name__}: {exc}")
         return {}
+
+    try:
+        status = session.session_status
+    except Exception as exc:
+        print(f"  timing {year} r{round_number}: no session status — "
+              f"{type(exc).__name__}: {exc}")
+        return {}
+
+    if status is None or status.empty:
+        print(f"  timing {year} r{round_number}: session status empty")
+        return {}
+
+    seen = [str(s) for s in status.get('Status', [])]
+    if 'Finalised' not in seen:
+        print(f"  timing {year} r{round_number}: not finalised yet — "
+              f"status so far {seen}")
+        return {}
+
+    res = session.results
+    if res is None or res.empty:
+        print(f"  timing {year} r{round_number}: finalised but no results table")
+        return {}
+
+    out = {}
+    for _, r in res.iterrows():
+        code = r.get('Abbreviation')
+        pos = r.get('Position')
+        if code and pos == pos:  # not NaN
+            try:
+                out[str(code)] = int(pos)
+            except (TypeError, ValueError):
+                continue
+    if not out:
+        print(f"  timing {year} r{round_number}: finalised but no positions "
+              f"in {len(res)} result row(s)")
+    return out
 
 
 def safety_car_occurred(year, round_number):
