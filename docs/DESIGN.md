@@ -1005,8 +1005,41 @@ of `rounded-xl border border-line bg-glass px-3 py-2.5` rows — or something
 better suited to the shape of the data (§12.2). Both halves live in the same
 component so they cannot drift.
 
-The current pairs: `RaceBreakdown` and the standings board. `ProbabilityGrid`
-used to be the third and no longer is — see §1.5 and §12.2.
+The only pair left is `RaceBreakdown`. `ProbabilityGrid` used to be the second
+and no longer is (§1.5, §12.2); the standings board was the third until
+2026-09 — see §7.5.1.
+
+#### 7.5.1 The timing tower
+
+`components/StandingsBoard.tsx`. The season board was the pattern above, done
+to the letter: a `<table>` in a `.glass-card` from `sm` up, a separate stack of
+cards below it, six columns of numbers at one weight. It was correct and it was
+furniture — a spreadsheet in a box, and two cuts of the same data free to drift
+apart.
+
+It is a tower now: **one `<ol>` at every width**, hairline-separated, no card.
+The position hangs in the margin, the name and the race count take the room,
+and the numbers run down tabular columns. Below `sm` three columns fold into a
+sub-line under the name rather than into a second component. That is §1.4
+applied to the last block still separating with a band, and it is the shape
+`SeasonRaces` had already found for the calendar.
+
+Three things it says that a row of figures could not:
+
+- **The shape of a record.** `2-0-0` is a fact; a segmented bar — wins,
+  draws, losses by proportion — is a glance. The counts stay above it as the
+  exact reading, because the bar is never the only channel (§1.2).
+- **Form.** The last five duels, oldest to newest, as `W` / `D` / `L` in
+  1.15rem tiles carrying the site's three outcome tones. Colour *and* glyph,
+  each tile titled with its Grand Prix. The data comes from one window
+  function (migration 0012), not from reading every score on the page.
+- **Who a player rides for.** The rule left of every name is their
+  championship call's colour — the same rule that stands in front of a driver
+  everywhere else on the site — stretched to the height of the name block. No
+  call yet is `NEUTRAL_COLOR`, which is its own quiet nudge.
+
+Restraint holds where it matters: P1 is brighter ink, P2–P3 a step down, the
+rest `ink-mute`. No medals, no podium blocks, no row that glows.
 
 **A season is a table, and it took three tries to admit it.**
 `components/SeasonRaces.tsx` was a wrap of identical pills (twenty-four of
