@@ -5,7 +5,7 @@
 > breaks. If you can only read one document, read this one.
 
 **Status:** live in production.
-**Last reviewed:** 2026-08-27 (`main` at `35b6211`; redesign programme M-1…M-4 on `design/model-page`; live on https://f1-duel.com).
+**Last reviewed:** 2026-09-06 (`feat/openf1-sources` — OpenF1 as the timing source Actions can reach: same-evening scoring, safety car, grid, Driver of the Day; live on https://f1-duel.com).
 **Maintenance rule:** this file must be updated in the same change that alters
 behaviour it describes — schema, scoring, jobs, routes, env vars, deployment,
 workflows. See [§14 Keeping this document true](#14-keeping-this-document-true).

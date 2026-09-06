@@ -254,8 +254,8 @@ job log:
 
 | Log line | Meaning | Fix |
 | --- | --- | --- |
-| *no official classification yet* | FastF1 hasn't published it | Wait; it retries hourly |
-| *no model entry — run lock_race first* | The race locked without the model playing | See below |
+| *no official classification yet* | Neither Ergast nor OpenF1 has it yet (OpenF1 usually within the hour of the flag; an `openf1: …` line above it says why if OpenF1 refused) | Wait; it retries every 15 min on Sun/Mon, hourly otherwise |
+| *no model entry — run lock_race first* | The race locked without the model playing | `lock-race` backfills it on its next run; see below to hurry it |
 | *refusing to score a partial field* | The read and the server row count disagree | Re-run; if it persists, stop and investigate — never force it |
 
 Nothing happens at all until `race_at + 2h`.
@@ -288,22 +288,40 @@ player's score and the result row — it does **not** touch
 
 ### Driver of the Day
 
-There is no official API, so this is the one thing entered by hand. It re-scores
-the race immediately, so the +5 lands right away:
+There is no official API. `score_race` reads it itself from the article
+formula1.com links on the race hub (`jobs/dotd.py`), on every pass until it
+finds one — usually within the hour of the flag. When the log says *no unique
+roster match*, or nothing at all about dotd for days, enter it by hand; it
+re-scores the race immediately, so the +5 lands right away:
 
 ```bash
 python jobs/set_dotd.py 2026 13 max_verstappen
 ```
 
 The `driver_id` is validated against the season roster — check the spelling with
-the roster query in §5.
+the roster query in §5. A hand-entered DotD is kept: the automatic read only
+fills a null.
+
+### Re-score a race, any race
+
+```bash
+python jobs/score_race.py --rounds 13              # one
+python jobs/score_race.py --rounds 1-13 --dry-run  # all, printed, nothing written
+```
+
+Or Actions → **score-race** → *Run workflow* with `rounds` filled in. This is
+how the safety-car bet was settled retroactively for the whole of 2026 on
+2026-09-06. Result mails are not re-sent (`email_log`), points and standings
+move.
 
 ### The safety-car flag is wrong
 
-Don't fix it in SQL. `results.safety_car` is **recomputed from FastF1 every time
-a race is scored**, so an edit by hand changes nothing anybody sees and vanishes
-on the next re-score. If the flag is genuinely wrong, the bug is in
-`safety_car_occurred()` (`jobs/model_bridge.py`) or in the upstream data.
+Don't fix it in SQL. `results.safety_car` is **recomputed from OpenF1's race
+control every time a race is scored**, so an edit by hand changes nothing
+anybody sees and vanishes on the next re-score. Null means race control had
+published nothing when the race was scored — the ten-day window asks again,
+`--rounds` asks now. If the flag is genuinely wrong, the bug is in
+`openf1.safety_car()` (`src/openf1.py`) or in the upstream data.
 
 ---
 
