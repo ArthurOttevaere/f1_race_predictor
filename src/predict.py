@@ -29,10 +29,15 @@ from sklearn.preprocessing import LabelEncoder
 import xgboost as xgb
 import lightgbm as lgb
 
-# Silence les logs FastF1 (INFO/WARNING parasites quand une session n'existe pas encore)
+# Silence les logs FastF1 (INFO/WARNING parasites quand une session n'existe pas
+# encore). FASTF1_VERBOSE=1 les rend : quand FastF1 échoue à charger une source,
+# il le dit en WARNING et continue sans lever — donc à CRITICAL un job de
+# scoring qui n'a pas ses données n'a aucun moyen de savoir pourquoi. C'est
+# exactement ce qui a coûté deux passes à l'aveugle sur le GP d'Italie 2026.
 for _lg in ('fastf1', 'fastf1.core', 'fastf1.req', 'fastf1._api',
             'fastf1.ergast', 'urllib3', 'requests'):
-    logging.getLogger(_lg).setLevel(logging.CRITICAL)
+    logging.getLogger(_lg).setLevel(
+        logging.INFO if os.environ.get('FASTF1_VERBOSE') else logging.CRITICAL)
 
 ROOT       = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA       = os.path.join(ROOT, 'data', 'processed')
