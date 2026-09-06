@@ -1264,6 +1264,52 @@ choice was invisible half the time. The toggle is two swatches rather than a
 dropdown — there are two values and both are colours — with `aria-pressed` and
 a ring on the chosen one, so the state is never colour alone (§1.2).
 
+### 7.16 The duel sheet
+
+`components/DuelSheet.tsx`, opened under a row of the profile's season list
+(`ProfileRaces`), and the print-out of one Grand Prix: a player's ten calls,
+the model's ten, the official ten.
+
+It is the race page's side-by-side (`RaceBreakdown`) without the tap. That
+table is inspectable — a position opens the arithmetic behind it — because on
+a race page a reader is asking *why*. On a profile the question is *what did
+they call*, twenty-four times over, and a sheet answers it the way a timing
+screen does: run the eye down a column. So every call carries its mark and its
+points inline, in the proof table's four glyphs (`✓ ~ • ·`, §3.2 tones), and
+nothing is hidden behind a control.
+
+Three columns from `sm` up; **two on a phone**. The official column is the
+casualty, and it can be, because each call's mark already says where its
+driver finished. The receipts follow the same columns as the calls — bonuses
+only when one fired, then the two totals at `text-lg` — so the number the eye
+was running down to is where the column ends.
+
+The list opens **one sheet at a time**. Two open sheets is forty rows; the
+chevron on the row is the control and the row is the target (`aria-expanded`,
+`aria-controls`). `#r13` in the URL opens round 13 on arrival, which is how a
+name in a race page's field lands on that player's race and not on their cover.
+
+### 7.17 The card that asks
+
+Three new cards on the profile and `/game` (2026-09) share one shape, and it is
+the shape of a request rather than of a fact: a `glass-card` bordered in the
+tone of what it asks (race red for an action, the verdict's tone for a
+result), an eyebrow, a display line saying the thing plainly — *Your top 10 for
+the Spanish Grand Prix isn't in* — one sentence of why, and the way in as a
+red text link with the site's arrow, never a button inside a card that is
+itself a link.
+
+They differ from the empty state (§7.8) in that the container is not empty:
+the profile without a championship call has a section for it, and the section
+says what is missing and what it costs to leave it. They differ from the
+locked state (§7.13) in that nothing is withheld. And they are **the owner's
+only**: a visitor sees a muted line where the owner sees the card, because
+somebody else's unmade choice is not their business.
+
+The last-duel card on `/game` is the same shape carrying a result — the two
+totals at `text-3xl` and the letter — and it exists because the one line it
+replaced gave the viewer's own verdict the weight of a footnote.
+
 ---
 
 ## 8. Motion

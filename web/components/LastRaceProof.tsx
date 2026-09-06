@@ -5,6 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import { CURRENT_SEASON } from "@/lib/constants";
 import { formatPoints, shortName } from "@/lib/format";
 import { driverColor } from "@/lib/teams";
+import {
+  fieldSummary,
+  modelForm,
+  tally,
+  type FieldSummary,
+  type ModelForm,
+} from "@/lib/duels";
 import type {
   Driver,
   ModelEntry,
@@ -56,6 +63,17 @@ export type LastRace = {
   rows: Row[];
   total: number;
   exact: number;
+  /** Exact or one place off. */
+  withinOne: number;
+  /** Of the model's ten, how many finished anywhere in the top 10. */
+  top10: number;
+  /**
+   * How the field did against it here — "beaten by 5 of 6" — and the model's
+   * season so far. Both are what the hero's cue prints instead of a count of
+   * exact hits, which on a normal Sunday is two and reads as a failure.
+   */
+  field: FieldSummary | null;
+  form: ModelForm | null;
   /** The season roster, already in hand — see `official` below. */
   roster: Driver[];
   /**
@@ -93,22 +111,27 @@ export const loadLastRace = cache(async (): Promise<LastRace | null> => {
   const race = raceRow as Pick<Race, "id" | "round" | "name"> | null;
   if (!race) return null;
 
-  const [entryRes, resultRes, rosterRes] = await Promise.all([
-    supabase
-      .from("model_entries")
-      .select("predicted_order, breakdown, total")
-      .eq("race_id", race.id)
-      .maybeSingle(),
-    supabase
-      .from("results")
-      .select("classification")
-      .eq("race_id", race.id)
-      .maybeSingle(),
-    supabase
-      .from("drivers")
-      .select("driver_id, code, full_name, team, team_color, active")
-      .eq("season", CURRENT_SEASON),
-  ]);
+  const [entryRes, resultRes, rosterRes, seasonEntriesRes, seasonRacesRes, field] =
+    await Promise.all([
+      supabase
+        .from("model_entries")
+        .select("predicted_order, breakdown, total")
+        .eq("race_id", race.id)
+        .maybeSingle(),
+      supabase
+        .from("results")
+        .select("classification")
+        .eq("race_id", race.id)
+        .maybeSingle(),
+      supabase
+        .from("drivers")
+        .select("driver_id, code, full_name, team, team_color, active")
+        .eq("season", CURRENT_SEASON),
+      // The season's worth of totals — two dozen rows — for the form line.
+      supabase.from("model_entries").select("race_id, total"),
+      supabase.from("races").select("id, name").eq("season", CURRENT_SEASON),
+      fieldSummary(supabase, CURRENT_SEASON),
+    ]);
 
   const entry = entryRes.data as Pick<
     ModelEntry,
@@ -140,11 +163,23 @@ export const loadLastRace = cache(async (): Promise<LastRace | null> => {
     };
   });
 
+  const counts = tally(entry.breakdown?.slots);
+  const seasonRaces = new Map(
+    ((seasonRacesRes.data as Pick<Race, "id" | "name">[]) ?? []).map((r) => [r.id, r]),
+  );
+
   return {
     race,
     rows,
     total: entry.total ?? 0,
-    exact: rows.filter((r) => r.kind === "exact").length,
+    exact: counts.exact,
+    withinOne: counts.withinOne,
+    top10: counts.top10,
+    field: field.get(race.id) ?? null,
+    form: modelForm(
+      (seasonEntriesRes.data as Pick<ModelEntry, "race_id" | "total">[]) ?? [],
+      seasonRaces,
+    ),
     roster: (rosterRes.data as Driver[]) ?? [],
     official: Array.from({ length: 10 }, (_, i) => finishers.get(i + 1) ?? "")
       .filter(Boolean),
@@ -162,7 +197,18 @@ export const loadLastRace = cache(async (): Promise<LastRace | null> => {
 export default async function LastRaceProof() {
   const data = await loadLastRace();
   if (!data) return null;
-  const { race, rows, total, exact } = data;
+  const { race, rows, total, exact, withinOne, top10 } = data;
+
+  // The tally, largest circle first. "2 of 10 exact" is the truth told in
+  // the one way that makes a good race sound like a bad one: exact hits are
+  // rare by design (that is what the multipliers pay for). Eight of ten in
+  // the top 10 and five within a place is the same race, read the way a
+  // pundit would read it.
+  const tallyLine = [
+    `${top10} of its 10 finished in the top 10`,
+    `${withinOne} within a place`,
+    `${exact} on the nose`,
+  ].join(" · ");
 
   return (
     <section
@@ -262,9 +308,7 @@ export default async function LastRaceProof() {
             <p className="font-mono text-[0.6rem] tracking-[0.14em] text-ink-mute uppercase">
               Model total
             </p>
-            <p className="mt-1.5 text-xs text-ink-dim">
-              {exact} of 10 on the nose
-            </p>
+            <p className="mt-1.5 text-xs text-ink-dim">{tallyLine}</p>
           </div>
           <p className="font-mono text-5xl leading-none font-semibold tabular-nums sm:text-6xl">
             {formatPoints(total)}

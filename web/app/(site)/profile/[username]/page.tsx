@@ -6,13 +6,17 @@ import { pickValue } from "@/lib/champions";
 import { driverColor, seasonPickColor, teamColor } from "@/lib/teams";
 import type {
   Driver,
+  ModelEntry,
   PlayerDetails,
   Profile,
   Race,
+  RaceResult,
   Score,
   SeasonPick,
 } from "@/lib/types";
+import { buildSheet } from "@/lib/duels";
 import { type CurvePoint } from "@/components/PointsCurve";
+import { type ProfileRace } from "@/components/ProfileRaces";
 import ProfileView from "@/components/ProfileView";
 
 export const revalidate = 120;
@@ -53,30 +57,36 @@ export default async function ProfilePage({
   const viewer = await getUser();
   const isOwner = viewer?.id === profile.id;
 
-  const [{ data: pickRow }, { data: scoreRows }, { data: raceRows }, { data: rosterRows }] =
-    await Promise.all([
-      supabase
-        .from("season_picks")
-        .select("*")
-        .eq("user_id", profile.id)
-        .eq("season", CURRENT_SEASON)
-        .maybeSingle(),
-      supabase.from("scores").select("*").eq("user_id", profile.id),
-      supabase.from("races").select("*").eq("season", CURRENT_SEASON),
-      supabase.from("drivers").select("*").eq("season", CURRENT_SEASON),
-    ]);
-
-  // Only fetched for the owner: RLS would hand a visitor nothing anyway, so
-  // the round-trip is pure waste on someone else's profile.
-  const details = isOwner
-    ? ((
-        await supabase
-          .from("player_details")
-          .select("*")
-          .eq("id", profile.id)
-          .maybeSingle()
-      ).data as PlayerDetails | null)
-    : null;
+  const nowIso = new Date().toISOString();
+  const [
+    { data: pickRow },
+    { data: scoreRows },
+    { data: raceRows },
+    { data: rosterRows },
+    { data: nextRaces },
+  ] = await Promise.all([
+    supabase
+      .from("season_picks")
+      .select("*")
+      .eq("user_id", profile.id)
+      .eq("season", CURRENT_SEASON)
+      .maybeSingle(),
+    supabase.from("scores").select("*").eq("user_id", profile.id),
+    supabase.from("races").select("*").eq("season", CURRENT_SEASON),
+    supabase.from("drivers").select("*").eq("season", CURRENT_SEASON),
+    // The Grand Prix still open — only the owner is nudged about it, but the
+    // read is one row and it settles whether there is a weekend at all.
+    isOwner
+      ? supabase
+          .from("races")
+          .select("id, round, name, race_at")
+          .eq("season", CURRENT_SEASON)
+          .eq("status", "scheduled")
+          .gt("race_at", nowIso)
+          .order("race_at", { ascending: true })
+          .limit(1)
+      : Promise.resolve({ data: null }),
+  ]);
 
   const pick = pickRow as SeasonPick | null;
   const roster = (rosterRows as Driver[]) ?? [];
@@ -91,6 +101,77 @@ export default async function ProfilePage({
   const chrono = ((scoreRows as Score[]) ?? [])
     .filter((s) => races.has(s.race_id))
     .sort((a, b) => roundOf(a.race_id) - roundOf(b.race_id));
+  const racedIds = chrono.map((s) => s.race_id);
+
+  const nextRace =
+    ((nextRaces as Pick<Race, "id" | "round" | "name" | "race_at">[] | null)?.[0]) ??
+    null;
+
+  // Second wave, on what the first told us: the model's side of every duel
+  // this player ran and the official result, both public once a race has
+  // locked (migration 0009) — and, for the owner, whether this weekend's top
+  // 10 is in and the private details row (RLS would hand a visitor nothing
+  // for either, so neither is asked for on someone else's profile).
+  const [{ data: entryRows }, { data: resultRows }, { data: myPredRows }, detailsRes] =
+    await Promise.all([
+      racedIds.length
+        ? supabase
+            .from("model_entries")
+            .select("race_id, predicted_order, breakdown, total")
+            .in("race_id", racedIds)
+        : Promise.resolve({ data: [] }),
+      racedIds.length
+        ? supabase
+            .from("results")
+            .select("race_id, classification")
+            .in("race_id", racedIds)
+        : Promise.resolve({ data: [] }),
+      isOwner && nextRace
+        ? supabase
+            .from("predictions")
+            .select("race_id")
+            .eq("user_id", profile.id)
+            .eq("race_id", nextRace.id)
+        : Promise.resolve({ data: [] }),
+      isOwner
+        ? supabase.from("player_details").select("*").eq("id", profile.id).maybeSingle()
+        : Promise.resolve({ data: null }),
+    ]);
+  const details = (detailsRes.data as PlayerDetails | null) ?? null;
+
+  const entries = new Map(
+    ((entryRows as Pick<ModelEntry, "race_id" | "predicted_order" | "breakdown" | "total">[]) ?? [])
+      .map((e) => [e.race_id, e]),
+  );
+  const results = new Map(
+    ((resultRows as Pick<RaceResult, "race_id" | "classification">[]) ?? []).map(
+      (r) => [r.race_id, r],
+    ),
+  );
+
+  // Newest first: "what happened last time?" is the question the list answers.
+  const duels: ProfileRace[] = [...chrono].reverse().map((s) => {
+    const race = races.get(s.race_id)!;
+    return {
+      round: race.round,
+      name: race.name,
+      outcome: s.beat_model ? "W" : s.drew_model ? "D" : "L",
+      total: Number(s.total),
+      modelTotal: Number(s.breakdown.model_total ?? 0),
+      sheet: buildSheet(s, entries.get(s.race_id) ?? null, results.get(s.race_id) ?? null, byDriverId),
+    };
+  });
+
+  // The owner's weekend: the open Grand Prix, and whether their top 10 is in.
+  const weekend =
+    isOwner && nextRace?.race_at
+      ? {
+          round: nextRace.round,
+          name: nextRace.name,
+          raceAt: nextRace.race_at,
+          entered: ((myPredRows as { race_id: number }[] | null) ?? []).length > 0,
+        }
+      : null;
 
   const total =
     chrono.reduce((sum, s) => sum + Number(s.total), 0) +
@@ -153,7 +234,8 @@ export default async function ProfilePage({
       paint={paint}
       themeChoice={themeChoice}
       chrono={chrono}
-      races={races}
+      duels={duels}
+      weekend={weekend}
       curve={curve}
       wins={wins}
       draws={draws}

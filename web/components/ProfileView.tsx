@@ -1,13 +1,16 @@
 import Link from "next/link";
+import Arrow from "@/components/Arrow";
+import Countdown from "@/components/Countdown";
 import DeleteAccount from "@/components/DeleteAccount";
 import PickStub from "@/components/PickStub";
 import PointsCurve, { type CurvePoint } from "@/components/PointsCurve";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import ProfileEditPanel from "@/components/ProfileEditPanel";
+import ProfileRaces, { type ProfileRace } from "@/components/ProfileRaces";
 import { formatPoints, shortName } from "@/lib/format";
 import { tint } from "@/lib/teams";
 import type { PickValue } from "@/lib/champions";
-import type { Driver, Race, Score, SeasonPick } from "@/lib/types";
+import type { Driver, Score, SeasonPick } from "@/lib/types";
 
 export interface ProfileViewProps {
   profile: { username: string; created_at: string };
@@ -28,9 +31,12 @@ export interface ProfileViewProps {
   /** Whichever of the two the owner chose to be painted in (migration 0010). */
   paint: string;
   themeChoice: "driver" | "team";
-  /** Oldest first — the order the curve reads in; the history reverses it. */
+  /** Oldest first — the order the curve reads in. */
   chrono: Score[];
-  races: Map<number, Race>;
+  /** Newest first — every duel raced, each with its sheet. */
+  duels: ProfileRace[];
+  /** The owner's open Grand Prix, and whether their top 10 is in. Null for a visitor. */
+  weekend: { round: number; name: string; raceAt: string; entered: boolean } | null;
   curve: CurvePoint[];
   wins: number;
   draws: number;
@@ -58,7 +64,8 @@ export default function ProfileView({
   paint,
   themeChoice,
   chrono,
-  races,
+  duels,
+  weekend,
   curve,
   wins,
   draws,
@@ -197,11 +204,83 @@ export default function ProfileView({
           </div>
         </header>
 
+        {/* ── This weekend, for its owner ────────────────────────────────────
+            A profile is where a player goes to look at themselves, and the
+            most useful thing it can say about them on a Friday is that their
+            top 10 for Sunday is not in. Nothing for a visitor: somebody else's
+            unentered race is not their business, and not a call to action. */}
+        {weekend && !weekend.entered && (
+          <Link
+            href="/game"
+            className="pressable glass-card group mt-6 flex flex-col gap-3 border-race/40 px-5 py-4 transition-colors hover:border-race/70 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+          >
+            <div>
+              <p className="font-mono text-xs tracking-[0.2em] text-race uppercase">
+                Round {weekend.round} · not entered
+              </p>
+              <p className="display mt-1 text-lg font-extrabold tracking-tight">
+                Your top 10 for the {weekend.name} isn&apos;t in.
+              </p>
+              <Countdown
+                to={weekend.raceAt}
+                label="Lights out in"
+                className="mt-1.5"
+              />
+            </div>
+            <span className="flex shrink-0 items-center gap-2 text-sm font-semibold text-race">
+              Make your calls
+              <Arrow />
+            </span>
+          </Link>
+        )}
+
         {/* ── The call that paints this page ────────────────────────────────
             It used to be said twice: two coloured chips under the username, and
             the same two names again in two cards below. The chips are gone —
             the call is told once, here, where there is room to draw it as what
-            it is. See PickStub. */}
+            it is. See PickStub.
+
+            Without one, the section still exists. For the owner it is the
+            pitch — a season-long bet with a bonus that shrinks every week they
+            leave it, which is the one honest reason to hurry; for a visitor
+            it is a line, because the absence is part of who this player is
+            this season and a page that skipped it would read as a page with a
+            hole in it. */}
+        {!pick && (
+          <section className="mt-10">
+            <h2 className="font-mono text-xs tracking-[0.2em] text-ink-dim uppercase">
+              Championship call
+            </h2>
+            {isOwner ? (
+              <Link
+                href="/game/picks"
+                className="pressable glass-card group mt-5 flex flex-col gap-4 border-race/40 p-5 transition-colors hover:border-race/70 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+              >
+                <div>
+                  <p className="display text-xl font-extrabold tracking-tight sm:text-2xl">
+                    You haven&apos;t called your world champions.
+                  </p>
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-dim">
+                    One driver, one constructor, locked for the season. The
+                    bigger the outsider and the earlier the call, the bigger
+                    the bonus at the final flag — and it shrinks with every
+                    Grand Prix you wait. Your profile wears the colours you
+                    choose.
+                  </p>
+                </div>
+                <span className="flex shrink-0 items-center gap-2 text-sm font-semibold text-race">
+                  Call them now
+                  <Arrow />
+                </span>
+              </Link>
+            ) : (
+              <p className="mt-4 text-sm text-ink-mute">
+                No championship call this season — yet.
+              </p>
+            )}
+          </section>
+        )}
+
         {pick && value && (
           <section className="mt-10">
             <h2 className="font-mono text-xs tracking-[0.2em] text-ink-dim uppercase">
@@ -281,57 +360,15 @@ export default function ProfileView({
             >
               {curve.length >= 2 && <PointsCurve points={curve} color={paint} />}
 
-              <div>
-                <div
-                  aria-hidden
-                  className="grid grid-cols-[2rem_1.5rem_minmax(0,1fr)_4rem] items-center gap-x-3 px-2 pb-2 font-mono text-[0.6rem] tracking-wider text-ink-mute uppercase sm:grid-cols-[2.25rem_1.5rem_minmax(0,1fr)_4rem_4rem] sm:gap-x-4"
-                >
-                  <span>Rd</span>
-                  <span />
-                  <span>Grand Prix</span>
-                  <span className="hidden text-right sm:block">Model</span>
-                  <span className="text-right">Pts</span>
-                </div>
-
-                <ol className="border-b border-line">
-                  {[...chrono].reverse().map((s) => {
-                    const race = races.get(s.race_id)!;
-                    const outcome = s.beat_model ? "W" : s.drew_model ? "D" : "L";
-                    return (
-                      <li key={s.race_id} className="border-t border-line">
-                        <Link
-                          href={`/game/races/${race.round}`}
-                          className="grid grid-cols-[2rem_1.5rem_minmax(0,1fr)_4rem] items-center gap-x-3 rounded-control px-2 py-2.5 transition-colors hover:bg-glass sm:grid-cols-[2.25rem_1.5rem_minmax(0,1fr)_4rem_4rem] sm:gap-x-4"
-                        >
-                          <span className="font-mono text-xs text-ink-mute tabular-nums">
-                            {String(race.round).padStart(2, "0")}
-                          </span>
-                          <span
-                            className={`text-center font-mono text-sm font-semibold ${
-                              s.beat_model
-                                ? "text-emerald-400"
-                                : s.drew_model
-                                  ? "text-amber-300"
-                                  : "text-race"
-                            }`}
-                          >
-                            {outcome}
-                          </span>
-                          <span className="truncate text-sm">
-                            {race.name.replace(" Grand Prix", "")}
-                          </span>
-                          <span className="hidden text-right font-mono text-xs text-ink-mute tabular-nums sm:block">
-                            {formatPoints(Number(s.breakdown.model_total ?? 0))}
-                          </span>
-                          <span className="text-right font-mono text-sm tabular-nums">
-                            {formatPoints(Number(s.total))}
-                          </span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </div>
+              {/* Each row opens into the sheet of that duel — the player's ten
+                  calls beside the model's, marked and priced. See
+                  ProfileRaces; it used to be a link to the race page, which
+                  shows a visitor everything about the race except this
+                  player's part in it. */}
+              <ProfileRaces
+                races={duels}
+                playerLabel={isOwner ? "You" : profile.username}
+              />
             </div>
           )}
         </section>

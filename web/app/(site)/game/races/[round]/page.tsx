@@ -13,6 +13,7 @@ import RaceBreakdown, {
   type BreakdownRow,
   type Receipt,
 } from "@/components/RaceBreakdown";
+import { fieldLine, fieldSummary } from "@/lib/duels";
 import type {
   Driver,
   ModelEntry,
@@ -86,6 +87,7 @@ export default async function RaceReviewPage({
     myPredRes,
     ownProfile,
     nextRaceRes,
+    fieldByRace,
   ] = await Promise.all([
       supabase.from("model_entries").select("*").eq("race_id", race.id).maybeSingle(),
       supabase.from("results").select("*").eq("race_id", race.id).maybeSingle(),
@@ -137,8 +139,12 @@ export default async function RaceReviewPage({
             .order("race_at", { ascending: true })
             .limit(1)
             .maybeSingle(),
+      // "Beaten by 5 of 6 players" — the whole field, not the capped page
+      // of it above (migration 0011).
+      fieldSummary(supabase, race.season),
     ]);
 
+  const field = fieldByRace.get(race.id);
   const entry = entryRes.data as ModelEntry | null;
   const result = resultRes.data as RaceResult | null;
   const drivers = new Map(
@@ -237,6 +243,22 @@ export default async function RaceReviewPage({
             Round {race.round} · {race.country}
           </p>
           <h1 className="display mt-1 text-3xl font-extrabold tracking-tight">{race.name}</h1>
+          {/* The race in one line: what the machine scored and how the field
+              did against it. It used to take the whole page to learn this. */}
+          {race.status === "scored" && entry?.total != null && (
+            <p className="mt-2 font-mono text-xs text-ink-dim">
+              The model scored{" "}
+              <span className="text-ink">{formatPoints(entry.total)}</span>
+              {fieldLine(field) && (
+                <>
+                  {" "}·{" "}
+                  <span className={field && field.beat > 0 ? "text-emerald-400" : ""}>
+                    {fieldLine(field)!.toLowerCase()}
+                  </span>
+                </>
+              )}
+            </p>
+          )}
         </div>
         {/* The poster is rendered exactly once — its data is serialized into
             the page, so a second copy would ship it twice — and it moves to
@@ -393,8 +415,12 @@ export default async function RaceReviewPage({
                   }`}
                 >
                   <span className="w-6 font-mono text-ink-mute">{i + 1}</span>
+                  {/* `#r<round>` opens this race's sheet on their profile —
+                      their ten calls beside the model's — rather than the
+                      cover. */}
                   <Link
-                    href={`/profile/${p?.username ?? ""}`}
+                    href={`/profile/${p?.username ?? ""}#r${race.round}`}
+                    title={`${p?.username ?? "player"}'s calls at the ${race.name}`}
                     className="flex-1 font-medium hover:underline"
                   >
                     {p?.username ?? "player"}

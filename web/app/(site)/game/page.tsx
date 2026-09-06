@@ -9,6 +9,7 @@ import Countdown from "@/components/Countdown";
 import PredictionEditor from "@/components/PredictionEditor";
 import SeasonOver from "@/components/SeasonOver";
 import { modelEntries, modelSeason } from "@/lib/model";
+import { fieldLine, fieldSummary, type FieldSummary } from "@/lib/duels";
 
 export const metadata = { title: "This weekend" };
 export const revalidate = 60;
@@ -157,14 +158,18 @@ export default async function GamePage() {
   } | null;
   const lastScored = (lastScoredRes.data?.[0] as Race | undefined) ?? null;
 
-  let lastDuel: { race: Race; score: Score | null; model: number | null } | null =
-    null;
+  let lastDuel: {
+    race: Race;
+    score: Score | null;
+    model: number | null;
+    field: FieldSummary | undefined;
+  } | null = null;
   // The order the model played *last* time out — what a signed-out visitor
   // sees behind the sign-in veil (see `previewOrder` below). Safe to read here
   // and nowhere else on this page: that race is over.
   let lastModelOrder: string[] | null = null;
   if (lastScored) {
-    const [scoreRes, modelRes] = await Promise.all([
+    const [scoreRes, modelRes, field] = await Promise.all([
       user
         ? supabase
             .from("scores")
@@ -178,6 +183,7 @@ export default async function GamePage() {
         .select(user ? "total" : "total, predicted_order")
         .eq("race_id", lastScored.id)
         .maybeSingle(),
+      fieldSummary(supabase, CURRENT_SEASON),
     ]);
     const model = modelRes.data as Pick<
       ModelEntry,
@@ -187,6 +193,7 @@ export default async function GamePage() {
       race: lastScored,
       score: (scoreRes.data as Score | null) ?? null,
       model: model?.total ?? null,
+      field: field.get(lastScored.id),
     };
     lastModelOrder = model?.predicted_order ?? null;
   }
@@ -264,30 +271,78 @@ export default async function GamePage() {
         </div>
       </section>
 
-      {/* ── Last duel result ── */}
+      {/* ── Last duel ──
+          One line of grey used to sit here — "Last duel · Italian Grand Prix
+          — See the breakdown" — the same weight as a footnote, for the one
+          result on the page that is *yours*. It is a card now: the verdict in
+          the tone the site uses for it everywhere, the two totals at timing-
+          tower size, and for somebody who sat the race out, what the model
+          did and how many of the others beat it — the bar they are about to
+          be measured against. */}
       {lastDuel && (
         <Link
           href={`/game/races/${lastDuel.race.round}`}
-          // Gap and shrink-0, both load-bearing: `justify-between` alone let
-          // the race name wrap under a call-to-action it was already touching,
-          // and "Hungarian Grand" ran straight into "See the breakdown".
-          className="pressable glass-chip flex flex-col items-start gap-1 rounded-panel px-5 py-3 text-sm transition-colors hover:border-line-hi sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+          className={`pressable glass-card group flex flex-col gap-4 p-5 transition-colors sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 ${
+            lastDuel.score
+              ? lastDuel.score.beat_model
+                ? "border-emerald-400/40 hover:border-emerald-400/70"
+                : lastDuel.score.drew_model
+                  ? "border-amber-300/40 hover:border-amber-300/70"
+                  : "border-race/40 hover:border-race/70"
+              : "hover:border-line-hi"
+          }`}
         >
-          <span className="text-ink-dim">
-            Last duel · {lastDuel.race.name}
-          </span>
+          <div className="min-w-0">
+            <p className="font-mono text-xs tracking-[0.2em] text-ink-mute uppercase">
+              Last duel · Round {lastDuel.race.round}
+            </p>
+            <p className="display mt-1 truncate text-lg font-extrabold tracking-tight">
+              {lastDuel.score
+                ? lastDuel.score.beat_model
+                  ? `You beat the model at the ${lastDuel.race.name}`
+                  : lastDuel.score.drew_model
+                    ? `Dead heat at the ${lastDuel.race.name}`
+                    : `The model took the ${lastDuel.race.name}`
+                : user
+                  ? `The ${lastDuel.race.name}, without you`
+                  : `The ${lastDuel.race.name}, as the model played it`}
+            </p>
+            <p className="mt-1 text-sm text-ink-dim">
+              {lastDuel.score ? (
+                fieldLine(lastDuel.field) ? (
+                  <>
+                    The model was {fieldLine(lastDuel.field)!.toLowerCase()}.
+                  </>
+                ) : null
+              ) : (
+                <>
+                  The model scored {formatPoints(lastDuel.model ?? 0)}
+                  {fieldLine(lastDuel.field) && (
+                    <> and was {fieldLine(lastDuel.field)!.toLowerCase()}</>
+                  )}
+                  . See how they did it.
+                </>
+              )}
+            </p>
+          </div>
+
           {lastDuel.score ? (
-            <span className="shrink-0 font-mono">
-              You {formatPoints(lastDuel.score.total)} —{" "}
-              {formatPoints(lastDuel.model ?? 0)} Model{" "}
+            <div className="flex shrink-0 items-baseline gap-3 font-mono">
+              <span className="text-3xl font-semibold tabular-nums">
+                {formatPoints(lastDuel.score.total)}
+              </span>
+              <span className="text-ink-mute">–</span>
+              <span className="text-3xl font-semibold text-ink-dim tabular-nums">
+                {formatPoints(lastDuel.model ?? 0)}
+              </span>
               <span
-                className={
+                className={`ml-1 text-sm font-semibold ${
                   lastDuel.score.beat_model
-                    ? "ml-2 text-emerald-400"
+                    ? "text-emerald-400"
                     : lastDuel.score.drew_model
-                      ? "ml-2 text-amber-300"
-                      : "ml-2 text-race"
-                }
+                      ? "text-amber-300"
+                      : "text-race"
+                }`}
               >
                 {lastDuel.score.beat_model
                   ? "W"
@@ -295,9 +350,9 @@ export default async function GamePage() {
                     ? "D"
                     : "L"}
               </span>
-            </span>
+            </div>
           ) : (
-            <span className="flex shrink-0 items-center gap-2 text-ink-mute">
+            <span className="flex shrink-0 items-center gap-2 text-sm font-semibold text-ink-dim transition-colors group-hover:text-ink">
               See the breakdown
               <Arrow />
             </span>

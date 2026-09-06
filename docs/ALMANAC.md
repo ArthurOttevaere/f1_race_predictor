@@ -5,7 +5,7 @@
 > breaks. If you can only read one document, read this one.
 
 **Status:** live in production.
-**Last reviewed:** 2026-09-06 (`feat/openf1-sources` — OpenF1 as the timing source Actions can reach: same-evening scoring, safety car, grid, Driver of the Day; live on https://f1-duel.com).
+**Last reviewed:** 2026-09-06 (`feat/profile-duels-review`, after PR #83 — the duel sheet on profiles, the championship call as a welcome step, the model's season on the home page, migration 0011; live on https://f1-duel.com).
 **Maintenance rule:** this file must be updated in the same change that alters
 behaviour it describes — schema, scoring, jobs, routes, env vars, deployment,
 workflows. See [§14 Keeping this document true](#14-keeping-this-document-true).
@@ -861,6 +861,7 @@ editor.
 | `0008_race_emails.sql` | `profiles.email_opt_out` + `unsubscribe_token`, `email_log`, `email_recipients()`, `email_prefs()`, `set_email_opt_out()` | ✅ confirmed 2026-08-15 |
 | `0009_model_picks_secret_until_lock.sql` | replaces `public read` on `model_entries` with `read post-lock`; adds the `model_entry_status` view | ⚠️ **apply before the next race weekend** — until it runs, the model's picks are readable while the race is open |
 | `0010_profile_theme.sql` | `profiles.theme` (`driver` \| `team`, default `driver`) — which half of the championship call paints the profile | ✅ confirmed 2026-08-27 |
+| `0011_race_field_summary.sql` | `race_field_summary(season)` — per race: players, beat, drew; one aggregate over the public `scores` (security invoker) so the race lists never read every score of the season | ✅ applied 2026-09-06 (through the Supabase MCP, in the same session as the PR) |
 
 The app is written to survive a missing migration rather than crash: profile
 reads use `select("*")` instead of naming new columns, and `lib/auth.ts`
@@ -1463,6 +1464,17 @@ there's no `player_details` row; otherwise to the requested `next` (validated by
 `app/(site)/game/layout.tsx` re-checks with `needsOnboarding()` so nobody lands
 in the standings as `player_3f9a…`.
 
+**The third step — the championship call** (2026-09-06). `needsOnboarding()`
+also asks `needsPicksPrompt()`: no `season_picks` row for the season and no
+`picks_later` cookie. `/welcome` then shows `SeasonPicksForm` as its last
+screen, wider than the other two, with a **Later** button — a `POST` to
+`/welcome/later` that sets the cookie for thirty days and sends the player on
+(a `GET` that changed state would be prefetched). The step is skippable on
+purpose: a bet locked for the season should not be made under a redirect. It
+comes back once the cookie lapses; in between, the owner's profile and `/game`
+carry the reminder. `destinationFor()` is untouched — landing on `/game` is
+what triggers the layout's check.
+
 **`?next=`** is honoured end to end: `/login` reads it (validating it the same
 way `safePath()` does) and passes it to password sign-in, `signUp`'s
 `emailRedirectTo`, the magic link and the Google `redirectTo`. This is what
@@ -1563,6 +1575,17 @@ generated shape, and they are rebuilt:**
   mono label, sans value, hairline between — which is the shape `/rules` has
   used all along.
 
+*The proof's tally and the hero's cue* (2026-09-06). The card's foot used to
+say "2 of 10 on the nose" — true, and the one reading of a fair race that makes
+it sound like a bad one, since exact hits are rare by design. It now prints
+the tally largest circle first (`lib/duels.tally`): *7 of its 10 finished in
+the top 10 · 4 within a place · 2 on the nose*. The hero's scroll cue stopped
+quoting the last race at all and quotes the season (`lib/duels.modelForm`,
+over every scored entry whether or not it counts in the standings): *It
+averages 41.9 a Grand Prix · best 69 at the Canadian GP*. Both come out of
+`loadLastRace`, which now also reads the season's totals and the field summary
+(migration 0011).
+
 **`/game`** (`revalidate = 60`) — finds the next `scheduled` race with
 `race_at > now`, then fetches in parallel: the active roster, **`model_entry_status`**
 (`pre_quali`/`locked_at` — has the model filed, and in which mode), your
@@ -1609,6 +1632,14 @@ this page:**
 
 ⚠️ The Flask app (§5) predicts the *upcoming* race by design. It is not
 deployed; deploying it publicly would reopen exactly what 0009 closed.
+
+*The last-duel card* (2026-09-06). One grey line — "Last duel · Italian Grand
+Prix — See the breakdown" — used to carry the one result on the page that was
+the viewer's. It is a `glass-card` now, bordered in the verdict's tone: the
+verdict as a sentence, the two totals at `text-3xl` with the letter, and the
+field line ("the model was beaten by 5 of 6 players", from `race_field_summary`
+via `lib/duels.fieldSummary`). Signed in but absent from the race, it says so
+and gives the bar; signed out, it says how the model played it.
 
 **`/game/races/[round]`** (`revalidate = 120`) — redirects to `/game` if the
 race is still `scheduled`. Shows the duel banner (win/draw/loss + the margin),
@@ -1662,6 +1693,13 @@ then the total. Every number was already in `scores.breakdown` and
 `model_entries.breakdown` — none of it was surfaced. Scores are drawn as chips
 **pinned to their own driver's name**; right-aligned in the cell they sat
 against the next column and read as its score.
+
+*The header line and the field's links* (2026-09-06). Under the title, one
+mono line says the race: *The model scored 41 · beaten by 5 of 6 players*
+(`fieldLine`, from the whole field rather than the capped page of it). Every
+name in **The field** links to `/profile/<username>#r<round>`, which opens
+that player's sheet for this race on arrival — their ten calls beside the
+model's — instead of landing on the cover.
 
 **`/game/standings`** (`revalidate = 120`) — 100 players per page via
 `standings_page`. The model's season total is the sum of `model_entries.total`
@@ -1719,6 +1757,16 @@ page's four blocks and one site-wide habit:
 - **Pagination became a band of positions** (S-4,
   `components/StandingsPager.tsx`): `21–40 of 96 players` and two square
   chevron controls, above one page only.
+
+*Race by race, for everyone* (2026-09-06). Signed out, the race list was a
+bare list of names — a table promising nothing. `SeasonRaces` now carries two
+public columns on every row: **Model** (its total, from `modelEntries`) and
+**Beat it** (`5 / 6`: players who beat it over players who entered, from
+`race_field_summary`; a dash when nobody entered). The viewer's own two
+columns still exist only signed in. The model's season total, meanwhile, is
+counted from round 12 — `admin_model_count_from(2026, 12)` was run on
+2026-09-06, because eleven of its thirteen races were played before anyone
+had signed up and "545 over 13 races" meant nothing to a player.
 
 **`/game/leagues`** — a `redirect()` to `/game/standings`, nothing more. Kept
 because invite links, bookmarks and messages players already sent point at it.
@@ -1834,6 +1882,30 @@ database is a placeholder.
   delete row with a red-outlined button. The confirmation flow is unchanged.
 - **P-4:** the race review's `?` disc is the word `why` / `close`
   (`RaceBreakdown`). The site has no icon set and did not need one here.
+
+*Three additions on 2026-09-06.*
+
+- **Every duel opens into its sheet.** The season list was a link per race to
+  the race page — the *race's* page, with the field and the model and, for a
+  visitor, none of this player's calls on it. `ProfileRaces` (client) keeps
+  the same rows and opens one at a time into `DuelSheet`: the player's ten
+  calls beside the model's, each marked (`✓ ~ • ·`, the proof table's marks)
+  and priced, the official order in a third column from `sm` up, the bonuses
+  that fired and the two totals. `lib/duels.buildSheet` reads both stored
+  breakdowns — nothing is re-derived. The page's second wave of reads
+  (`model_entries`, `results` for the raced ids, both public post-lock) is
+  what feeds it. `#r<round>` opens a round on arrival; the race page's field
+  links here with it.
+- **The championship call, when there isn't one.** The section no longer
+  disappears. The owner gets a red-bordered card with the pitch (the bonus
+  shrinks every week it is left) and the way to `/game/picks`; a visitor gets
+  one muted line, because the absence is part of who this player is this
+  season. This and the welcome step (§9.3) are the two nudges that replaced
+  the single banner on `/game`, after three of the first eight accounts never
+  found the page.
+- **This weekend, for its owner.** If the open Grand Prix has no prediction
+  from the owner, a card above the championship call says so, with the
+  countdown and the way in. Nothing for a visitor.
 
 **`/contact`** — where a player takes a bug or an idea, the FAQ, and the
 credits. The FAQ is native `<details>` rather than a JavaScript accordion: it

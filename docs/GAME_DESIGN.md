@@ -118,6 +118,11 @@ The bonus is **prorated by the fraction of the season remaining at lock**
 (floor 20 %), so a mid-season pick is worth less than a round-1 pick and the
 system works for a mid-season launch.
 
+Since 2026-09 the call is the last step of onboarding (`/welcome`), after the
+username and the private details — skippable with a "later" that returns after
+thirty days, because a bet locked for the season should not be made under a
+redirect. Until it is made, the owner's profile and `/game` both say so.
+
 **Where the payout lands (decided 2026-08).** It is no longer added to the
 season points column, because that column stopped being the ranking key (§2.5)
 and a race board carrying a non-race bonus reads as a bug. `settle_season.py`

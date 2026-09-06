@@ -1,5 +1,7 @@
 import { cache } from "react";
+import { cookies } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { CURRENT_SEASON } from "@/lib/constants";
 import { createClient, getUser } from "@/lib/supabase/server";
 
 /**
@@ -93,5 +95,34 @@ export async function needsUsername(): Promise<boolean> {
 /** True when /welcome still has something to ask the signed-in player. */
 export async function needsOnboarding(): Promise<boolean> {
   if (await needsUsername()) return true;
-  return !(await hasDetails());
+  if (!(await hasDetails())) return true;
+  return await needsPicksPrompt();
 }
+
+/** The cookie a player sets by saying "later" to the championship call. */
+export const PICKS_LATER_COOKIE = "picks_later";
+
+/**
+ * Whether /welcome should still put the championship call in front of the
+ * signed-in player: no pick for the season, and no "later" on record.
+ *
+ * The pick is a season-long bet nobody should be forced into on their first
+ * screen, so the step is skippable — but a skipped step that never returns
+ * is a step that did not exist. "Later" lives in a cookie for thirty days,
+ * after which the screen comes back once; the profile and /game carry the
+ * reminder in between, deduplicated per request like the rest.
+ */
+export const needsPicksPrompt = cache(async (): Promise<boolean> => {
+  const user = await getUser();
+  if (!user) return false;
+  const jar = await cookies();
+  if (jar.get(PICKS_LATER_COOKIE)) return false;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("season_picks")
+    .select("season")
+    .eq("user_id", user.id)
+    .eq("season", CURRENT_SEASON)
+    .maybeSingle();
+  return !error && !data;
+});

@@ -8,6 +8,7 @@ import LeagueCardActions from "@/components/LeagueCardActions";
 import SeasonRaces from "@/components/SeasonRaces";
 import StandingsPager from "@/components/StandingsPager";
 import { modelEntries, modelSeason } from "@/lib/model";
+import { fieldSummary } from "@/lib/duels";
 
 export const metadata = { title: "Standings" };
 export const revalidate = 120;
@@ -30,7 +31,7 @@ export default async function StandingsPage({
   const supabase = await createClient();
   const { league: leagueParam, page: pageParam } = await searchParams;
 
-  const [{ data: races }, entries, user, { data: leaguesData }] =
+  const [{ data: races }, entries, user, { data: leaguesData }, field] =
     await Promise.all([
       supabase
         .from("races")
@@ -42,7 +43,15 @@ export default async function StandingsPage({
       // the filter needs the name, and the panel under it needs the code and
       // the owner to decide between "Leave" and "Delete league".
       supabase.from("leagues").select("*").order("name"),
+      // How the field did against the model, per race — the race list's
+      // two public columns.
+      fieldSummary(supabase, CURRENT_SEASON),
     ]);
+  const modelByRace = new Map(
+    entries
+      .filter((e) => e.total !== null)
+      .map((e) => [e.race_id, Number(e.total)]),
+  );
 
   const myLeagues = (leaguesData as League[]) ?? [];
   const selectedLeague =
@@ -190,6 +199,8 @@ export default async function StandingsPage({
             name: r.name,
             circuit: r.circuit,
           }))}
+          model={modelByRace}
+          field={field}
           mine={user ? myRaces : null}
         />
       )}
