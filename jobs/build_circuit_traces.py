@@ -19,6 +19,7 @@ seen.
 
 from __future__ import annotations
 
+import json
 import math
 import re
 import sys
@@ -29,6 +30,15 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "web" / "lib" / "circuits.ts"
+
+# Geometry traced from a published circuit diagram, for a venue where no lap
+# exists yet — a circuit that has never been driven has no telemetry anywhere,
+# and until first practice the hero would otherwise carry nothing at all.
+#
+# It is a stand-in and it says so: every entry emits `source: "schematic"` plus
+# the credit its licence requires, and telemetry always wins, so the first run
+# after that venue's FP1 replaces it with the real thing and never comes back.
+SCHEMATIC = ROOT / "jobs" / "schematic_traces.json"
 
 # FastF1 relabels a venue from time to time without the tarmac changing, so an
 # exact-location fallback to last season silently loses a circuit. One entry
@@ -207,8 +217,11 @@ HEADER = '''// GENERATED — do not edit by hand. See jobs/build_circuit_traces.
 // viewBox; `start` is the start/finish line and the direction of travel
 // through it.
 //
-// A circuit that has never been raced is simply absent, and the hero renders
-// without a trace. Re-run the job when the calendar gains a venue.
+// A circuit nobody has driven yet is absent unless jobs/schematic_traces.json
+// carries a traced diagram for it, in which case the entry is marked
+// `source: "schematic"` and carries the credit its licence requires. Telemetry
+// always wins and replaces it after that venue's first session.
+// Re-run the job when the calendar gains a venue.
 
 export interface CircuitTrace {
   /** Matches `races.circuit`, lowercased and hyphenated. */
@@ -223,6 +236,12 @@ export interface CircuitTrace {
   corners: number;
   /** The season the geometry was taken from. */
   season: number;
+  /** Where the shape came from. `schematic` is a stand-in for a venue that has
+   *  never been driven, and is replaced by telemetry after its first session. */
+  source: "telemetry" | "schematic";
+  /** Attribution required by a schematic's licence. Absent for telemetry. */
+  credit?: string;
+  creditUrl?: string;
 }
 
 '''
@@ -237,6 +256,8 @@ def main() -> None:
     prev_round = {
         str(ev["Location"]): int(ev["RoundNumber"]) for _, ev in prev.iterrows()
     }
+
+    schematic = json.loads(SCHEMATIC.read_text()) if SCHEMATIC.exists() else {}
 
     now = pd.Timestamp.utcnow().tz_localize(None)
     out, missing = [], []
@@ -260,10 +281,19 @@ def main() -> None:
         if t is None and prev_loc in prev_round:
             t = trace(season - 1, prev_round[prev_loc])
         if t:
+            t["source"] = "telemetry"
+        else:
+            # No lap anywhere: fall back to a traced diagram if we have one.
+            t = schematic.get(_slug(loc))
+            if t:
+                t = dict(t, source="schematic", season=season)
+        if t:
             t["slug"] = _slug(loc)
             t["location"] = loc
             out.append(t)
-            print(f"  {loc:<22} {t['corners']:>2} corners  {len(t['path']):>5} chars  ({t['season']})")
+            origin = t["season"] if t["source"] == "telemetry" else "diagram"
+            print(f"  {loc:<22} {t['corners']:>2} corners  "
+                  f"{len(t['path']):>5} chars  ({origin})")
         else:
             missing.append(loc)
 
@@ -281,6 +311,10 @@ def main() -> None:
         )
         body.append(f'    corners: {t["corners"]},')
         body.append(f'    season: {t["season"]},')
+        body.append(f'    source: "{t["source"]}",')
+        if t.get("credit"):
+            body.append(f'    credit: {t["credit"]!r}'.replace("'", '"') + ",")
+            body.append(f'    creditUrl: "{t["credit_url"]}",')
         body.append("  },")
     body.append("};\n")
     body.append("""/** The trace for a `races.circuit` value, or null if that venue has no lap yet. */
